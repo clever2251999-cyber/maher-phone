@@ -1,95 +1,127 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<!doctype html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>ماهر فون</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-    <style>
-        body { background: #f5f5f5; }
-        .product-img { height: 220px; object-fit: contain; }
-        .navbar-brand { font-size: 25px; font-weight: bold; }
-    </style>
+  <meta charset="utf-8">
+  <title>Maher Phone - Products</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body{font-family: Arial, sans-serif; padding: 16px;}
+    #products div{border:1px solid #ddd;padding:8px;margin:8px 0;border-radius:6px;}
+  </style>
 </head>
 <body>
+  <h1>منتجات Maher Phone</h1>
 
-<nav class="navbar navbar-dark bg-dark p-3">
-    <div class="container d-flex justify-content-between">
-        <a class="navbar-brand" href="#">📱 ماهر فون</a>
-        <div>
-            <button class="btn btn-outline-light me-2" onclick="location.href='products.html'">جميع المنتجات</button>
-            <button class="btn btn-light" onclick="location.href='cart.html'">🛒 السلة</button>
-            <button class="btn btn-outline-warning" onclick="location.href='admin.html'">🔧 Admin</button>
-        </div>
-    </div>
-</nav>
+  <div id="auth">
+    <input id="email" placeholder="Email">
+    <input id="password" placeholder="Password" type="password">
+    <button id="btnSignUp">سجل</button>
+    <button id="btnSignIn">دخول</button>
+    <button id="btnSignOut" style="display:none;">خروج</button>
+    <span id="userInfo"></span>
+  </div>
 
-<div class="container mt-4">
-    <div class="p-5 text-center bg-white rounded shadow">
-        <h1 class="mb-3">مرحبًا بك في متجر ماهر فون</h1>
-        <p class="lead">أفضل أسعار الموبايلات في مصر – شحن لجميع المحافظات</p>
-        <button onclick="location.href='products.html'" class="btn btn-dark btn-lg mt-3">تصفّح المنتجات</button>
-    </div>
+  <div id="products"></div>
 
-    <h2 class="mt-5">أحدث المنتجات</h2>
-    <div id="previewProducts" class="row g-4 mt-2"></div>
-</div>
+  <hr>
+  <a href="profile.html">صفحتي</a>
+  <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
 
-<footer class="bg-dark text-white text-center p-3 mt-5">
-    جميع الحقوق محفوظة © ماهر فون 2025
-</footer>
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
-<script>
-function getProducts() {
-    let p = JSON.parse(localStorage.getItem('products'));
-    return p && Array.isArray(p) ? p : [];
-}
+  <script>
+    // ====== ضع هنا إعدادات Firebase من مشروعك (web app config) ======
+    const firebaseConfig = {
+      apiKey: "API_KEY",
+      authDomain: "PROJECT_ID.firebaseapp.com",
+      projectId: "PROJECT_ID",
+      storageBucket: "PROJECT_ID.appspot.com",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
 
-function cryptoRandomId() {
-    return 'id-' + Math.random().toString(36).slice(2,9);
-}
+    // Auth UI
+    const emailEl = document.getElementById('email');
+    const passEl = document.getElementById('password');
+    const btnSignUp = document.getElementById('btnSignUp');
+    const btnSignIn = document.getElementById('btnSignIn');
+    const btnSignOut = document.getElementById('btnSignOut');
+    const userInfo = document.getElementById('userInfo');
+    const adminLink = document.getElementById('adminLink');
 
-// إضافة منتج للسلة
-function addToCart(productId) {
-    let products = getProducts();
-    let prod = products.find(p => p.id === productId);
-    if (!prod) return alert("المنتج غير موجود");
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    cart.push({id: prod.id, name: prod.name, price: prod.price, img: prod.img});
-    localStorage.setItem('cart', JSON.stringify(cart));
-    alert("تمت إضافة المنتج للسلة");
-}
+    btnSignUp.onclick = async () => {
+      try {
+        const userCredential = await auth.createUserWithEmailAndPassword(emailEl.value, passEl.value);
+        alert('تم التسجيل، رجاءً اذهب لصفحتي لتعبئة بياناتك.');
+      } catch (e) { alert(e.message); }
+    };
+    btnSignIn.onclick = async () => {
+      try {
+        await auth.signInWithEmailAndPassword(emailEl.value, passEl.value);
+      } catch (e) { alert(e.message); }
+    };
+    btnSignOut.onclick = () => auth.signOut();
 
-// عرض أحدث المنتجات (آخر 3 منتجات)
-function renderPreview() {
-    let products = getProducts();
-    let container = document.getElementById('previewProducts');
-    container.innerHTML = '';
-    if (!products || products.length === 0) {
-        container.innerHTML = '<p class="text-center">لا توجد منتجات بعد.</p>';
-        return;
-    }
-    let slice = products.slice(-3).reverse();
-    slice.forEach(prod => {
-        container.innerHTML += `
-            <div class="col-md-4">
-                <div class="card shadow-sm">
-                    <img src="${prod.img}" class="card-img-top product-img">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">${prod.name}</h5>
-                        <p class="text-danger fw-bold">${prod.price.toLocaleString()} جنيه</p>
-                        <button class="btn btn-dark" onclick="addToCart('${prod.id}')">إضافة للسلة</button>
-                    </div>
-                </div>
-            </div>
-        `;
+    auth.onAuthStateChanged(async user => {
+      if (user) {
+        userInfo.textContent = user.email;
+        btnSignOut.style.display = 'inline';
+        btnSignIn.style.display = 'none';
+        btnSignUp.style.display = 'none';
+        // show admin link if admin email (set ADMIN_EMAIL in README)
+        if (user.email === "admin@example.com") adminLink.style.display = 'inline';
+      } else {
+        userInfo.textContent = 'زائر';
+        btnSignOut.style.display = 'none';
+        btnSignIn.style.display = 'inline';
+        btnSignUp.style.display = 'inline';
+        adminLink.style.display = 'none';
+      }
     });
-}
 
-// راح يتنفذ كل مرة تتغير المنتجات
-window.addEventListener('storage', renderPreview);
-renderPreview();
-</script>
+    // عرض المنتجات (real-time)
+    const productsDiv = document.getElementById('products');
+    db.collection('products').orderBy('createdAt','desc').onSnapshot(snapshot => {
+      productsDiv.innerHTML = '';
+      snapshot.forEach(doc => {
+        const p = doc.data();
+        const card = document.createElement('div');
+        card.innerHTML = `
+          <h3>${p.name}</h3>
+          <img src="${p.imageURL}" width="120" alt="${p.name}">
+          <p>${p.description || ''}</p>
+          <p>السعر: ${p.price} جنيه</p>
+          <button onclick="addToCart('${doc.id}', '${p.name}', ${p.price})">أضف للسلة</button>
+        `;
+        productsDiv.appendChild(card);
+      });
+    });
 
+    // دالة إضافة للسلة
+    window.addToCart = async (productId, name, price) => {
+      const user = auth.currentUser;
+      if (!user) { alert('سجّل الدخول أولاً'); return; }
+      // نضيف مستند في /users/{uid}/cart
+      const cartRef = db.collection('users').doc(user.uid).collection('cart');
+      const q = await cartRef.where('productId','==',productId).limit(1).get();
+      if (!q.empty) {
+        const doc = q.docs[0];
+        await doc.ref.update({ qty: firebase.firestore.FieldValue.increment(1) });
+      } else {
+        await cartRef.add({
+          productId, name, price, qty: 1, addedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+      alert('تمت إضافة المنتج لسلتك');
+    };
+  </script>
 </body>
 </html>

@@ -58,6 +58,30 @@
         margin:10px 0;
     }
 
+    .btn{
+        background:#2196f3;
+        color:white;
+        padding:10px;
+        border:none;
+        border-radius:6px;
+        cursor:pointer;
+        width:100%;
+    }
+
+    #cart-btn{
+        position:fixed;
+        bottom:20px;
+        right:20px;
+        padding:12px 18px;
+        border:none;
+        background:#4caf50;
+        color:white;
+        border-radius:50px;
+        cursor:pointer;
+        font-size:16px;
+        box-shadow:0 0 8px #00000044;
+    }
+
     #logout{
         position:fixed;
         bottom:20px;
@@ -79,6 +103,7 @@
 
 <div id="products"></div>
 
+<button id="cart-btn" onclick="goCart()">🛒 السلة</button>
 <button id="logout" onclick="logout()">تسجيل خروج</button>
 
 <!-- Firebase -->
@@ -96,6 +121,17 @@ auth.onAuthStateChanged(user=>{
 function logout(){
     auth.signOut();
     location.href="index.html";
+}
+
+function goCart(){
+    location.href = "cart.html";
+}
+
+function addToCart(item){
+    let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    cart.push(item);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    alert("تم إضافة المنتج إلى السلة");
 }
 
 function loadProducts(){
@@ -116,6 +152,12 @@ function loadProducts(){
                         <h3>${p.name}</h3>
                         <p>${p.description}</p>
                         <div class="price">${p.price} جنيه</div>
+                        <button class="btn" onclick='addToCart(${JSON.stringify({
+                            id: doc.id,
+                            name: p.name,
+                            price: p.price,
+                            imageURL: p.imageURL
+                        })})'>🛒 إضافة للسلة</button>
                     </div>
                 `;
             });

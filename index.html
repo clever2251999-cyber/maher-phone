@@ -26,6 +26,7 @@
 
   <hr>
   <a href="profile.html">صفحتي</a>
+  <a href="products.html">المنتجات</a>
   <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
 
   <!-- Firebase SDK -->
@@ -52,7 +53,7 @@
 
     const btnSignUp = document.getElementById('btnSignUp');
     const btnSignIn = document.getElementById('btnSignIn');
-    const btnGuest  = document.getElementById('btnGuest');
+    const btnGuest = document.getElementById('btnGuest');
     const btnSignOut = document.getElementById('btnSignOut');
     const userInfo = document.getElementById('userInfo');
     const adminLink = document.getElementById('adminLink');
@@ -80,10 +81,9 @@
       const email = emailEl.value.trim();
       const pass = passEl.value.trim();
 
-      if (!email || !pass) return alert("ادخل البريد والرقم السري");
-
       try {
         await auth.signInWithEmailAndPassword(email, pass);
+        alert("تم تسجيل الدخول");
       } catch (e) {
         alert(e.message);
       }
@@ -93,6 +93,7 @@
     btnGuest.onclick = async () => {
       try {
         await auth.signInAnonymously();
+        alert("دخلت كزائر");
       } catch (e) {
         alert(e.message);
       }
@@ -106,31 +107,32 @@
       if (user) {
         userInfo.textContent = user.email ? user.email : "زائر";
 
-        btnSignOut.style.display = 'inline';
-        btnSignIn.style.display = 'none';
-        btnSignUp.style.display = 'none';
+        btnSignOut.style.display = "inline";
+        btnSignIn.style.display = "none";
+        btnSignUp.style.display = "none";
 
+        // إظهار رابط الأدمن
         if (!user.email) {
-          adminLink.style.display = 'none';
+          adminLink.style.display = "none";
         } else if (user.email === ADMIN_EMAIL) {
-          adminLink.style.display = 'inline';
+          adminLink.style.display = "inline";
         }
 
       } else {
         userInfo.textContent = "زائر";
-        btnSignOut.style.display = 'none';
-        btnSignIn.style.display = 'inline';
-        btnSignUp.style.display = 'inline';
-        adminLink.style.display = 'none';
+        btnSignOut.style.display = "none";
+        btnSignIn.style.display = "inline";
+        btnSignUp.style.display = "inline";
+        adminLink.style.display = "none";
       }
     });
 
     // تحميل المنتجات
-    const productsDiv = document.getElementById('products');
+    const productsDiv = document.getElementById("products");
 
-    db.collection("products").orderBy("createdAt", "desc").onSnapshot(snapshot => {
+    db.collection("products").orderBy("createdAt","desc").onSnapshot(snapshot=>{
       productsDiv.innerHTML = "";
-      snapshot.forEach(doc => {
+      snapshot.forEach(doc=>{
         const p = doc.data();
         productsDiv.innerHTML += `
           <div>
@@ -142,7 +144,6 @@
         `;
       });
     });
-
   </script>
 </body>
 </html>

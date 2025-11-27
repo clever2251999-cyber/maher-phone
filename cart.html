@@ -1,171 +1,93 @@
 <!doctype html>
 <html lang="ar">
 <head>
-  <meta charset="utf-8">
-  <title>سلة المشتريات</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <style>
-    body{
-        font-family:Arial;
-        direction:rtl;
-        margin:0;
-        background:#f2f2f2;
-        padding:15px;
-    }
-
-    h2{
-        text-align:center;
-        color:#2196f3;
-    }
-
-    .item{
-        background:white;
-        padding:10px;
-        margin:10px 0;
-        border-radius:10px;
-        display:flex;
-        gap:10px;
-        box-shadow:0 0 6px #00000022;
-    }
-
-    .item img{
-        width:100px;
-        height:100px;
-        border-radius:10px;
-        object-fit:cover;
-    }
-
-    .title{
-        font-size:18px;
-        font-weight:bold;
-        margin-bottom:5px;
-    }
-
-    .price{
-        color:#4caf50;
-        font-weight:bold;
-    }
-
-    .del{
-        background:red;
-        color:white;
-        border:none;
-        padding:5px 10px;
-        border-radius:6px;
-        cursor:pointer;
-        margin-top:10px;
-    }
-
-    input, textarea{
-        width:100%;
-        padding:10px;
-        margin:8px 0;
-        border-radius:6px;
-        border:1px solid #aaa;
-    }
-
-    #send{
-        width:100%;
-        padding:12px;
-        background:#2196f3;
-        color:white;
-        border:none;
-        border-radius:8px;
-        font-size:16px;
-        cursor:pointer;
-    }
-
-    #empty{
-        text-align:center;
-        padding:50px;
-        color:#555;
-    }
-  </style>
+<meta charset="utf-8">
+<title>السلة</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{font-family:Arial;direction:rtl;background:#f5f5f5;margin:0;padding:20px;}
+.card{background:#fff;padding:15px;margin-bottom:10px;border-radius:10px;box-shadow:0 0 8px #00000022;}
+input,button{width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:6px;}
+button{background:#2196f3;color:white;border:none;cursor:pointer;}
+</style>
 </head>
 
 <body>
 
 <h2>🛒 سلة المشتريات</h2>
 
-<div id="cart"></div>
+<div id="cart-items"></div>
 
 <h3>بيانات العميل</h3>
+<input id="name" placeholder="الاسم">
+<input id="phone" placeholder="رقم الهاتف">
+<input id="address" placeholder="العنوان">
 
-<input id="name" placeholder="الاسم بالكامل">
-<input id="phone" placeholder="رقم الموبايل">
-<textarea id="address" placeholder="العنوان بالتفصيل"></textarea>
-
-<button id="send" onclick="sendOrder()">إرسال الطلب</button>
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="firebase.js"></script>
+<button onclick="sendOrder()">إرسال الطلب</button>
 
 <script>
 
-let cart = JSON.parse(localStorage.getItem("cart") || "[]");
-
-function renderCart(){
-    const c = document.getElementById("cart");
+function loadCart(){
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const box = document.getElementById("cart-items");
 
     if(cart.length === 0){
-        c.innerHTML = "<div id='empty'>السلة فارغة</div>";
+        box.innerHTML = "<p>السلة فارغة</p>";
         return;
     }
 
-    c.innerHTML = "";
-    cart.forEach((item, index)=>{
-        c.innerHTML += `
-            <div class="item">
-                <img src="${item.imageURL}">
-                <div>
-                    <div class="title">${item.name}</div>
-                    <div class="price">${item.price} جنيه</div>
-                    <button class="del" onclick="delItem(${index})">حذف</button>
-                </div>
-            </div>
-        `;
+    let html = "";
+    cart.forEach((item,i)=>{
+        html += `
+        <div class="card">
+            <b>${item.name}</b><br>
+            السعر: ${item.price} جنيه<br>
+            <button onclick="deleteItem(${i})">حذف</button>
+        </div>`;
     });
+    box.innerHTML = html;
 }
 
-function delItem(i){
-    cart.splice(i, 1);
+function deleteItem(i){
+    let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    cart.splice(i,1);
     localStorage.setItem("cart", JSON.stringify(cart));
-    renderCart();
+    loadCart();
 }
+
+loadCart();
 
 function sendOrder(){
     const name = document.getElementById("name").value.trim();
     const phone = document.getElementById("phone").value.trim();
     const address = document.getElementById("address").value.trim();
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-    if(!name || !phone || !address){
-        return alert("من فضلك أكمل جميع البيانات");
+    if(!name || !phone || !address || cart.length===0){
+        alert("املأ البيانات كاملة");
+        return;
     }
 
-    if(cart.length === 0){
-        return alert("السلة فارغة!");
-    }
-
-    db.collection("orders").add({
+    // Read all orders
+    let orders = JSON.parse(localStorage.getItem("orders") || "[]");
+    
+    // Save new order
+    orders.push({
         name,
         phone,
         address,
-        items: cart,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(()=>{
-        alert("تم إرسال طلبك بنجاح!");
-        localStorage.removeItem("cart");
-        location.href = "products.html";
-    }).catch(()=>{
-        alert("حدث خطأ أثناء إرسال الطلب");
+        cart,
+        time: new Date().toLocaleString()
     });
-}
 
-renderCart();
+    localStorage.setItem("orders", JSON.stringify(orders));
+
+    // Clear the user's cart
+    localStorage.removeItem("cart");
+
+    alert("تم إرسال الطلب بنجاح");
+    location.href="products.html";
+}
 
 </script>
 

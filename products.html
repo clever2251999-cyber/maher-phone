@@ -44,66 +44,48 @@
         margin-bottom:10px;
     }
 
-    /* ⭐ تصغير حجم المنتجات */
     #products{
         display:grid;
-        grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
-        gap:22px;
-        padding:25px;
-        max-width:1250px;
+        grid-template-columns:repeat(auto-fill, minmax(270px, 1fr));
+        gap:28px;
+        padding:30px;
+        max-width:1300px;
         margin:auto;
     }
 
     .card{
         background:white;
-        padding:12px;
-        border-radius:16px;
-        box-shadow:0 4px 15px #00000015;
+        padding:18px;
+        border-radius:20px;
+        box-shadow:0 4px 20px #00000012;
         text-align:center;
         transition:0.3s;
+        cursor:pointer;
     }
 
     .card img{
         width:100%;
-        height:160px;
+        height:240px;
         object-fit:cover;
-        border-radius:14px;
-    }
-
-    .card h3{
-        font-size:18px;
-        margin:10px 0 6px;
-        font-weight:700;
-    }
-
-    .card p{
-        font-size:14px;
-        color:#555;
-        margin:0 0 8px;
-    }
-
-    .price{
-        font-size:17px;
-        font-weight:700;
-        margin-bottom:10px;
-        color:#111;
+        border-radius:16px;
     }
 
     .btn{
         background:#111;
         color:white;
-        padding:10px;
+        padding:12px;
         border:none;
-        border-radius:12px;
+        border-radius:14px;
         cursor:pointer;
         width:100%;
-        font-size:16px;
+        font-size:17px;
         font-weight:600;
+        margin-top:12px;
     }
 
     .del-btn{
         background:#d9534f;
-        margin-top:8px;
+        margin-top:10px;
     }
 
     #cart-btn{
@@ -118,7 +100,6 @@
         font-size:17px;
         cursor:pointer;
         box-shadow:0 0 18px #00000030;
-        z-index:20;
     }
 
     #logout{
@@ -132,7 +113,6 @@
         border-radius:12px;
         font-size:16px;
         cursor:pointer;
-        z-index:20;
     }
   </style>
 </head>
@@ -140,12 +120,12 @@
 
 <header>📱 Maher Phone</header>
 
+<!-- لوحة تحكم الأدمن -->
 <div id="adminPanel">
     <button onclick="location.href='add-product.html'">➕ إضافة منتج جديد</button>
 </div>
 
 <div id="products"></div>
-
 <button id="cart-btn" onclick="goCart()">🛒 السلة</button>
 <button id="logout" onclick="logout()">تسجيل خروج</button>
 
@@ -161,6 +141,7 @@ const ADMIN_EMAIL = "clever2251999@gmail.com";
 auth.onAuthStateChanged(user => {
     if (!user) return;
 
+    // ⭐ اظهار لوحة الادمن اذا هو الادمن
     if (!user.isAnonymous && user.email === ADMIN_EMAIL) {
         document.getElementById("adminPanel").style.display = "block";
     }
@@ -201,6 +182,7 @@ function loadProducts(user){
               let p = doc.data();
               let delBtn = "";
 
+              // ⭐ زر الحذف يظهر فقط للأدمن
               if (user && !user.isAnonymous && user.email === ADMIN_EMAIL) {
                 delBtn = `<button class="btn del-btn" onclick="deleteProduct('${doc.id}')">🗑 حذف المنتج</button>`;
               }

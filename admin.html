@@ -5,21 +5,50 @@
   <title>لوحة الأدمن - إضافة منتج</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body{font-family:Arial;padding:20px}
-    input,textarea{width:100%;padding:8px;margin:6px 0}
-    button{padding:10px 20px}
+    body{font-family:Arial;padding:20px;direction:rtl;background:#f8f8f8}
+    h2{color:#222}
+    input,textarea{
+        width:100%;
+        padding:10px;
+        margin:8px 0;
+        border:1px solid #ccc;
+        border-radius:8px;
+        font-size:16px
+    }
+    button{
+        padding:12px 22px;
+        font-size:16px;
+        background:#000;
+        color:white;
+        border:none;
+        border-radius:10px;
+        cursor:pointer
+    }
+    a{
+        display:block;
+        margin-top:20px;
+        color:#007bff;
+        font-weight:bold;
+        text-decoration:none
+    }
   </style>
 </head>
 <body>
 
-<h2>لوحة الأدمن</h2>
+<h2>📦 إضافة منتج جديد</h2>
 <div id="status" style="color:red;font-weight:bold;margin-bottom:15px"></div>
 
 <form id="form" style="display:none">
+  
   <input id="name" placeholder="اسم المنتج" required>
+  
   <textarea id="desc" placeholder="وصف المنتج"></textarea>
+  
   <input id="price" type="number" placeholder="السعر" required>
-  <input id="image" type="file" accept="image/*" required>
+  
+  <!-- 🔥 بدّلنا رفع الصورة إلى رابط -->
+  <input id="imageURL" type="text" placeholder="ضع رابط الصورة هنا" required>
+
   <button type="submit">إضافة المنتج</button>
 </form>
 
@@ -50,43 +79,23 @@ auth.onAuthStateChanged(user=>{
     document.getElementById("form").style.display = "block";
 });
 
-function uploadToGithubFolder(file){
-    return new Promise(resolve=>{
-        const fileName = Date.now() + "_" + file.name;
-
-        const url = `https://raw.githubusercontent.com/clever2251999-cyber/maher-phone/main/images/${fileName}`;
-
-        resolve(url);
-    });
-}
-
 document.getElementById("form").onsubmit = async (e)=>{
     e.preventDefault();
 
     const name  = document.getElementById("name").value;
     const desc  = document.getElementById("desc").value;
     const price = parseFloat(document.getElementById("price").value);
-    const file  = document.getElementById("image").files[0];
+    const imageURL = document.getElementById("imageURL").value;
 
-    if(!file) return alert("اختر صورة أولاً");
-
-    const fileName = Date.now() + "_" + file.name;
-
-    const uploadURL = `https://raw.githubusercontent.com/clever2251999-cyber/maher-phone/main/images/${fileName}`;
-
-    alert("⚠️ خذ بالك!\nارفع الصورة الآن بنفس الاسم التالي داخل images:\n\n" + fileName);
-
-    const confirmUpload = confirm("هل رفعت الصورة داخل images؟");
-
-    if(!confirmUpload){
-        return alert("ارفع الصورة أولاً!");
+    if(!imageURL.startsWith("http")){
+        return alert("⚠ ضع رابط صورة صحيح يبدأ بـ http");
     }
 
     await db.collection("products").add({
         name,
         description: desc,
         price,
-        imageURL: uploadURL,
+        imageURL,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 

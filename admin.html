@@ -1,107 +1,116 @@
-<!doctype html>
-<html lang="ar">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8">
-  <title>لوحة الأدمن - إضافة منتج</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body{font-family:Arial;padding:20px;direction:rtl;background:#f8f8f8}
-    h2{color:#222}
-    input,textarea{
-        width:100%;
-        padding:10px;
-        margin:8px 0;
-        border:1px solid #ccc;
-        border-radius:8px;
-        font-size:16px
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم - Maher Phone</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        background: #f3f4f6;
+        margin: 0;
+        font-family: "Cairo", sans-serif;
     }
-    button{
-        padding:12px 22px;
-        font-size:16px;
-        background:#000;
-        color:white;
-        border:none;
-        border-radius:10px;
-        cursor:pointer
+    header {
+        background: #0d6efd;
+        color: #fff;
+        padding: 20px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: 700;
     }
-    a{
-        display:block;
-        margin-top:20px;
-        color:#007bff;
-        font-weight:bold;
-        text-decoration:none
+    .container {
+        max-width: 550px;
+        background: #fff;
+        margin: 30px auto;
+        padding: 25px;
+        border-radius: 14px;
+        box-shadow: 0 5px 20px #00000020;
     }
-  </style>
+    input, textarea {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 12px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        font-size: 16px;
+    }
+    button {
+        width: 100%;
+        padding: 14px;
+        background: #0d6efd;
+        border: none;
+        color: #fff;
+        font-size: 18px;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+    button:hover {
+        background: #004fc0;
+    }
+</style>
 </head>
 <body>
 
-<h2>📦 إضافة منتج جديد</h2>
-<div id="status" style="color:red;font-weight:bold;margin-bottom:15px"></div>
+<header>📦 لوحة التحكم - إضافة منتج</header>
 
-<form id="form" style="display:none">
-  
-  <input id="name" placeholder="اسم المنتج" required>
-  
-  <textarea id="desc" placeholder="وصف المنتج"></textarea>
-  
-  <input id="price" type="number" placeholder="السعر" required>
-  
-  <!-- 🔥 بدّلنا رفع الصورة إلى رابط -->
-  <input id="imageURL" type="text" placeholder="ضع رابط الصورة هنا" required>
+<div class="container">
+    <input type="text" id="name" placeholder="اسم المنتج">
+    <textarea id="description" placeholder="الوصف"></textarea>
+    <input type="text" id="price" placeholder="السعر">
+    <input type="text" id="imageURL" placeholder="رابط الصورة">
 
-  <button type="submit">إضافة المنتج</button>
-</form>
+    <button onclick="addProduct()">➕ إضافة المنتج</button>
+</div>
 
-<a href="products.html">عرض المنتجات</a>
-
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="firebase.js"></script>
 
 <script>
-const ADMIN = "clever2251999@gmail.com";
 
-auth.onAuthStateChanged(user=>{
-    if(!user){
-        document.getElementById("status").textContent = "يجب تسجيل الدخول أولاً";
-        return;
+// بريد الأدمن
+const ADMIN_EMAIL = "clever2251999@gmail.com";
+
+// التحقق من أن المستخدم أدمن
+auth.onAuthStateChanged(user => {
+    if (!user || user.email !== ADMIN_EMAIL) {
+        alert("❌ غير مصرح بالدخول هنا");
+        location.href = "products.html";
     }
-
-    if(user.email !== ADMIN){
-        document.getElementById("status").textContent = "ليس لديك صلاحية الأدمن";
-        return;
-    }
-
-    document.getElementById("status").style.color = "green";
-    document.getElementById("status").textContent = "مرحباً أدمن: " + user.email;
-    document.getElementById("form").style.display = "block";
 });
 
-document.getElementById("form").onsubmit = async (e)=>{
-    e.preventDefault();
+// وظيفة إضافة المنتج
+function addProduct(){
+    let name = document.getElementById("name").value;
+    let description = document.getElementById("description").value;
+    let price = document.getElementById("price").value;
+    let imageURL = document.getElementById("imageURL").value;
 
-    const name  = document.getElementById("name").value;
-    const desc  = document.getElementById("desc").value;
-    const price = parseFloat(document.getElementById("price").value);
-    const imageURL = document.getElementById("imageURL").value;
-
-    if(!imageURL.startsWith("http")){
-        return alert("⚠ ضع رابط صورة صحيح يبدأ بـ http");
+    if(!name || !description || !price || !imageURL){
+        alert("⚠️ يرجى ملء جميع البيانات");
+        return;
     }
 
-    await db.collection("products").add({
+    db.collection("products").add({
         name,
-        description: desc,
+        description,
         price,
         imageURL,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        createdAt: Date.now()
+    })
+    .then(()=>{
+        alert("✔ تم إضافة المنتج بنجاح");
+    })
+    .catch(err=>{
+        alert("❌ حدث خطأ");
+        console.log(err);
     });
+}
 
-    alert("✅ تم إضافة المنتج بنجاح!");
-    e.target.reset();
-};
 </script>
 
 </body>

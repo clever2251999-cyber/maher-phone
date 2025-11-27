@@ -1,19 +1,28 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-  <meta charset="utf-8">
-  <title>السلة - ماهر فون</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+<meta charset="utf-8">
+<title>سلة المشتريات</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+ body{font-family:Arial;padding:16px}
+ input,textarea{width:100%;padding:8px;margin:6px 0}
+ button{padding:8px 14px;margin-top:5px}
+ .itemBox{border:1px solid #ddd;margin:6px 0;padding:10px;border-radius:6px}
+</style>
 </head>
-<body class="bg-light">
-<div class="container mt-4">
-  <h2>سلة المشتريات</h2>
-  <div id="cartItems"></div>
-  <hr>
-  <button id="checkoutBtn" class="btn btn-success">اكمال الشراء</button>
-  <a class="btn btn-secondary" href="products.html">العودة للمنتجات</a>
-</div>
+
+<body>
+
+<h2>سلة مشترياتك</h2>
+<div id="cart"></div>
+
+<h3>بيانات العميل</h3>
+<input id="cname" placeholder="الاسم">
+<input id="cphone" placeholder="رقم الهاتف">
+<textarea id="caddress" placeholder="العنوان"></textarea>
+
+<button id="sendOrder">إرسال الطلب</button>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -21,54 +30,96 @@
 <script src="firebase.js"></script>
 
 <script>
-auth.onAuthStateChanged(async user=>{
-  if(!user) return window.location.href = "index.html";
-  const uid = user.uid;
-  const cartRef = db.collection('users').doc(uid).collection('cart');
+const cartDiv = document.getElementById("cart");
 
-  cartRef.onSnapshot(async snap=>{
-    const container = document.getElementById('cartItems');
-    container.innerHTML = '';
-    let total = 0;
-    for(const doc of snap.docs){
-      const it = doc.data();
-      const prodDoc = await db.collection('products').doc(it.productId).get();
-      const p = prodDoc.exists ? prodDoc.data() : null;
-      if(!p) continue;
-      total += (p.price * (it.qty || 1));
-      container.innerHTML += `
-        <div class="card p-2 mb-2">
-          <h5>${p.name}</h5>
-          <p>الكمية: ${it.qty || 1} — السعر: ${p.price} جنيه</p>
-          <button class="btn btn-sm btn-outline-primary" onclick="inc('${doc.id}')">+</button>
-          <button class="btn btn-sm btn-outline-secondary" onclick="dec('${doc.id}')">-</button>
-          <button class="btn btn-sm btn-danger" onclick="removeItem('${doc.id}')">حذف</button>
-        </div>
-      `;
-    }
-    container.innerHTML += `<div class="mt-3"><strong>المجموع: ${total} جنيه</strong></div>`;
-  });
+auth.onAuthStateChanged(user=>{
+  if(!user){
+    cartDiv.innerHTML = "<p>سجل دخول أولاً.</p>";
+    return;
+  }
+
+  db.collection("carts").doc(user.uid).collection("items")
+    .onSnapshot(snap=>{
+      cartDiv.innerHTML = "";
+      let total = 0;
+
+      snap.forEach(doc=>{
+        const p = doc.data();
+        total += p.price;
+
+        cartDiv.innerHTML += `
+          <div class="itemBox">
+            <img src="${p.image}" width="80">
+            <h3>${p.name}</h3>
+            <p>السعر: ${p.price} جنيه</p>
+
+            <button onclick="removeItem('${doc.id}')">❌ حذف</button>
+          </div>
+        `;
+      });
+
+      cartDiv.innerHTML += `<h3>الإجمالي: ${total} جنيه</h3>`;
+    });
 });
 
-window.inc = async (cartId) => {
-  const uid = auth.currentUser.uid;
-  await db.collection('users').doc(uid).collection('cart').doc(cartId).update({ qty: firebase.firestore.FieldValue.increment(1) });
-};
-window.dec = async (cartId) => {
-  const uid = auth.currentUser.uid;
-  const ref = db.collection('users').doc(uid).collection('cart').doc(cartId);
-  const doc = await ref.get();
-  if(!doc.exists) return;
-  const qty = doc.data().qty || 1;
-  if(qty <= 1) await ref.delete();
-  else await ref.update({ qty: firebase.firestore.FieldValue.increment(-1) });
-};
-window.removeItem = async (cartId) => {
-  const uid = auth.currentUser.uid;
-  await db.collection('users').doc(uid).collection('cart').doc(cartId).delete();
-};
+// حذف منتج من السلة
+async function removeItem(id){
+  const user = auth.currentUser;
+  if(!user) return;
 
-document.getElementById('checkoutBtn').onclick = () => { window.location.href = 'checkout.html'; };
+  await db.collection("carts")
+    .doc(user.uid)
+    .collection("items")
+    .doc(id)
+    .delete();
+
+  alert("تم حذف المنتج من السلة");
+}
+
+// إرسال الطلب
+document.getElementById("sendOrder").onclick = async ()=>{
+  const user = auth.currentUser;
+  if(!user) return alert("سجل دخول أولاً");
+
+  const name = cname.value.trim();
+  const phone = cphone.value.trim();
+  const address = caddress.value.trim();
+
+  if(!name || !phone || !address){
+    alert("املأ جميع البيانات");
+    return;
+  }
+
+  const itemsSnap = await db.collection("carts").doc(user.uid).collection("items").get();
+  let items = [];
+  let total = 0;
+
+  itemsSnap.forEach(d=>{
+    items.push(d.data());
+    total += d.data().price;
+  });
+
+  if(items.length === 0){
+    alert("السلة فارغة");
+    return;
+  }
+
+  await db.collection("orders").add({
+    user: user.uid,
+    name, phone, address,
+    items,
+    total,
+    time: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  // مسح السلة بعد إرسال الطلب
+  await db.collection("carts").doc(user.uid).collection("items")
+    .get().then(q=>q.forEach(d=>d.ref.delete()));
+
+  alert("تم إرسال طلبك بنجاح");
+  location.href = "products.html";
+};
 </script>
+
 </body>
 </html>

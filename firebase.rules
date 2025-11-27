@@ -2,21 +2,37 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // 🔥 المنتجات
     match /products/{productId} {
-      allow read: if true;
-      allow write: if request.auth != null && request.auth.token.email == "admin@example.com";
+      allow read: if true; // أي حد يقرأ المنتجات
+      allow write: if request.auth != null 
+                    && request.auth.token.email == "clever2251999@gmail.com"; // الأدمن فقط يكتب
     }
 
+    // 🔥 بيانات المستخدمين
     match /users/{userId} {
+      // كل مستخدم يقرأ/يكتب بيانات نفسه فقط
       allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // 🔥 السلة الخاصة لكل مستخدم
       match /cart/{cartId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
     }
 
+    // 🔥 الطلبات
     match /orders/{orderId} {
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow read: if request.auth != null && (request.auth.token.email == "admin@example.com" || resource.data.userId == request.auth.uid);
+      // المستخدم ينشئ طلب لنفسه فقط
+      allow create: if request.auth != null 
+                     && request.resource.data.userId == request.auth.uid;
+
+      // الأدمن يقرأ كل الطلبات
+      // المستخدم يقرأ طلباته فقط
+      allow read: if request.auth != null 
+                   && (request.auth.token.email == "clever2251999@gmail.com" 
+                       || resource.data.userId == request.auth.uid);
+
+      // تحديث وحذف الطلبات ممنوع
       allow update, delete: if false;
     }
   }

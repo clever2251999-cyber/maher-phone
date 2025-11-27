@@ -51,7 +51,6 @@
     const db = firebase.firestore();
     const storage = firebase.storage();
 
-    // UI
     const emailEl = document.getElementById('email');
     const passEl = document.getElementById('password');
     const btnSignUp = document.getElementById('btnSignUp');
@@ -62,20 +61,31 @@
 
     const ADMIN_EMAIL = "clever2251999@gmail.com";
 
-    // تسجيل جديد
+    // تسجيل جديد (إصلاح مشكلة email invalid)
     btnSignUp.onclick = async () => {
+      const email = emailEl.value.trim();
+      const pass  = passEl.value.trim();
+
+      if (!email || !pass) return alert("ادخل بريد إلكتروني وكلمة مرور");
+      if (!email.includes("@") || !email.includes(".")) return alert("صيغة البريد الإلكتروني غير صحيحة");
+
       try {
-        await auth.createUserWithEmailAndPassword(emailEl.value, passEl.value);
+        await auth.createUserWithEmailAndPassword(email, pass);
         alert("تم التسجيل بنجاح ✓");
       } catch (e) {
         alert(e.message);
       }
     };
 
-    // تسجيل دخول
+    // تسجيل دخول (إصلاح email invalid)
     btnSignIn.onclick = async () => {
+      const email = emailEl.value.trim();
+      const pass  = passEl.value.trim();
+
+      if (!email || !pass) return alert("ادخل بريد إلكتروني وكلمة مرور");
+
       try {
-        await auth.signInWithEmailAndPassword(emailEl.value, passEl.value);
+        await auth.signInWithEmailAndPassword(email, pass);
       } catch (e) {
         alert(e.message);
       }
@@ -92,7 +102,8 @@
         btnSignIn.style.display = 'none';
         btnSignUp.style.display = 'none';
 
-        if (user.email === ADMIN_EMAIL) adminLink.style.display = 'inline';
+        if (user.email === ADMIN_EMAIL)
+          adminLink.style.display = 'inline';
 
       } else {
         userInfo.textContent = 'زائر';
@@ -128,7 +139,6 @@
       if (!user) return alert("قم بتسجيل الدخول أولاً");
 
       const cartRef = db.collection("users").doc(user.uid).collection("cart");
-
       const existing = await cartRef.where("productId", "==", productId).limit(1).get();
 
       if (!existing.empty) {
@@ -145,7 +155,6 @@
 
       alert("تمت إضافة المنتج للسلة ✓");
     };
-
   </script>
 </body>
 </html>

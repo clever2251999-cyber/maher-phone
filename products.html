@@ -2,70 +2,138 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8">
-  <title>جميع المنتجات - ماهر فون</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-  <style>.product-img { height: 230px; object-fit: contain; }</style>
+  <title>Maher Phone - المنتجات</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  
+  <style>
+    body{font-family: Arial; padding:16px;}
+    #products div{
+      border:1px solid #ddd;
+      padding:10px;
+      margin:10px 0;
+      border-radius:6px;
+    }
+  </style>
 </head>
-<body class="bg-light">
-<nav class="navbar navbar-dark bg-dark p-3">
-  <div class="container d-flex justify-content-between">
-    <a class="navbar-brand" href="index.html">📱 ماهر فون</a>
-    <div>
-      <a class="btn btn-light me-2" href="cart.html">🛒 السلة</a>
-      <a class="btn btn-outline-light" href="index.html">العودة</a>
-    </div>
-  </div>
-</nav>
 
-<div class="container mt-4">
-  <h2 class="mb-3">جميع المنتجات</h2>
-  <div id="allProducts" class="row g-3"></div>
+<body>
+
+<h1>منتجات Maher Phone</h1>
+
+<div id="auth">
+  <input id="email" placeholder="Email">
+  <input id="password" placeholder="Password" type="password">
+  <button id="btnSignUp">سجل</button>
+  <button id="btnSignIn">دخول</button>
+  <button id="btnGuest">دخول زائر</button>
+  <button id="btnSignOut" style="display:none;">خروج</button>
+  <span id="userInfo"></span>
 </div>
 
+<hr>
+
+<div id="products">
+  <p>يرجى تسجيل الدخول لعرض المنتجات</p>
+</div>
+
+<hr>
+
+<a href="profile.html">صفحتي</a> |
+<a href="products.html">المنتجات</a> |
+<a href="admin.html" id="adminLink" style="display:none;">Admin</a>
+
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="firebase.js"></script>
 
 <script>
-auth.onAuthStateChanged(user => {
-  if (!user) return window.location.href = 'index.html';
-  loadProducts();
-});
+const firebaseConfig = {
+  apiKey: "AIzaSyAAYSyJf1YPFU7bXB87hKuPSUzJ53G0tt4",
+  authDomain: "maher-phone-18581.firebaseapp.com",
+  projectId: "maher-phone-18581",
+  storageBucket: "maher-phone-18581.appspot.com",
+  messagingSenderId: "452858222210",
+  appId: "1:452858222210:web:12fa439652c4aa0b48869b"
+};
 
-function loadProducts(){
-  const container = document.getElementById('allProducts');
-  container.innerHTML = '';
-  db.collection('products').orderBy('createdAt','desc').onSnapshot(snapshot=>{
-    container.innerHTML = '';
-    if(snapshot.empty){ container.innerHTML = '<div class="alert alert-info">لا توجد منتجات بعد. الأدمن يمكنه الإضافة.</div>'; return; }
-    snapshot.forEach(doc=>{
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const emailEl = document.getElementById("email");
+const passEl = document.getElementById("password");
+const btnSignUp = document.getElementById("btnSignUp");
+const btnSignIn = document.getElementById("btnSignIn");
+const btnGuest = document.getElementById("btnGuest");
+const btnSignOut = document.getElementById("btnSignOut");
+const userInfo = document.getElementById("userInfo");
+const adminLink = document.getElementById("adminLink");
+const productsDiv = document.getElementById("products");
+
+const ADMIN = "clever2251999@gmail.com";
+
+// تسجيل جديد
+btnSignUp.onclick = () => {
+  auth.createUserWithEmailAndPassword(emailEl.value, passEl.value)
+    .catch(e => alert(e.message));
+};
+
+// تسجيل دخول
+btnSignIn.onclick = () => {
+  auth.signInWithEmailAndPassword(emailEl.value, passEl.value)
+    .catch(e => alert(e.message));
+};
+
+// دخول زائر
+btnGuest.onclick = () => auth.signInAnonymously();
+
+// خروج
+btnSignOut.onclick = () => auth.signOut();
+
+// متابعة حالة المستخدم
+auth.onAuthStateChanged(user => {
+  
+  if(!user){
+    userInfo.textContent = "غير مسجل";
+    btnSignOut.style.display = "none";
+    btnSignIn.style.display = "inline";
+    btnSignUp.style.display = "inline";
+    adminLink.style.display = "none";
+    productsDiv.innerHTML = "<p>يرجى تسجيل الدخول لعرض المنتجات</p>";
+    return;
+  }
+
+  // المستخدم مسجل دخول
+  userInfo.textContent = user.email ?? "زائر";
+  btnSignOut.style.display = "inline";
+  btnSignIn.style.display = "none";
+  btnSignUp.style.display = "none";
+
+  // إظهار الأدمن
+  if(user.email === ADMIN){
+    adminLink.style.display = "inline";
+  }
+
+  // تحميل المنتجات الآن فقط
+  db.collection("products").orderBy("createdAt","desc").onSnapshot(snapshot => {
+    productsDiv.innerHTML = "";
+    snapshot.forEach(doc => {
       const p = doc.data();
-      container.innerHTML += `
-        <div class="col-md-3">
-          <div class="card p-2 shadow-sm">
-            <img src="${p.imageURL}" class="product-img mb-2" alt="${p.name}">
-            <h5>${p.name}</h5>
-            <p class="text-danger fw-bold">${p.price.toLocaleString()} جنيه</p>
-            <button class="btn btn-dark" onclick="addToCart('${doc.id}')">إضافة للسلة</button>
-          </div>
+      productsDiv.innerHTML += `
+        <div>
+          <h3>${p.name}</h3>
+          <img src="${p.imageURL}" width="140">
+          <p>${p.description}</p>
+          <p>السعر: ${p.price} جنيه</p>
         </div>
       `;
     });
   });
-}
 
-async function addToCart(productId){
-  const user = auth.currentUser;
-  if(!user) return alert("سجل الدخول أولاً");
-  const uid = user.uid;
-  const cartRef = db.collection('users').doc(uid).collection('cart');
-  const q = await cartRef.where('productId','==',productId).limit(1).get();
-  if(!q.empty) await q.docs[0].ref.update({ qty: firebase.firestore.FieldValue.increment(1) });
-  else await cartRef.add({ productId, qty: 1, addedAt: firebase.firestore.FieldValue.serverTimestamp() });
-  alert("تمت إضافة المنتج للسلة");
-}
+});
 </script>
+
 </body>
 </html>

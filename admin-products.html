@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8">
+  <title>لوحة التحكم - إدارة المنتجات</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body{
+        font-family:Arial;
+        direction:rtl;
+        margin:0;
+        background:#f5f5f5;
+        padding:20px;
+    }
+
+    h2{
+        text-align:center;
+        margin-bottom:20px;
+    }
+
+    .product{
+        background:white;
+        padding:15px;
+        margin-bottom:15px;
+        border-radius:10px;
+        box-shadow:0 0 8px #00000022;
+        display:flex;
+        gap:15px;
+        align-items:center;
+    }
+
+    .product img{
+        width:90px;
+        height:90px;
+        border-radius:10px;
+        object-fit:cover;
+    }
+
+    .name{
+        font-size:18px;
+        font-weight:bold;
+    }
+
+    .delete-btn{
+        margin-right:auto;
+        background:red;
+        color:white;
+        border:none;
+        padding:10px;
+        border-radius:6px;
+        cursor:pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>🛠 إدارة المنتجات</h2>
+
+<div id="products"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="firebase.js"></script>
+
+<script>
+
+const ADMIN_EMAIL = "clever2251999@gmail.com";
+
+auth.onAuthStateChanged(user=>{
+    if(!user){
+        alert("يجب تسجيل الدخول");
+        location.href="index.html";
+        return;
+    }
+
+    if(user.email !== ADMIN_EMAIL){
+        alert("غير مسموح بالدخول");
+        location.href="products.html";
+        return;
+    }
+
+    loadProducts();
+});
+
+function loadProducts(){
+    const box = document.getElementById("products");
+    box.innerHTML = "جاري التحميل...";
+
+    db.collection("products")
+      .orderBy("createdAt", "desc")
+      .onSnapshot(snap=>{
+        box.innerHTML = "";
+
+        if(snap.empty){
+            box.innerHTML = "<p>لا توجد منتجات</p>";
+            return;
+        }
+
+        snap.forEach(doc=>{
+            let p = doc.data();
+
+            box.innerHTML += `
+                <div class="product">
+                    <img src="${p.imageURL}">
+                    <div>
+                        <div class="name">${p.name}</div>
+                        <div>${p.price} جنيه</div>
+                    </div>
+
+                    <button class="delete-btn" onclick="deleteProduct('${doc.id}')">
+                        حذف
+                    </button>
+                </div>
+            `;
+        });
+      });
+}
+
+function deleteProduct(id){
+    if(confirm("هل أنت متأكد من حذف المنتج؟")){
+        db.collection("products").doc(id).delete()
+        .then(()=>{
+            alert("تم حذف المنتج");
+        })
+        .catch(err=>{
+            alert("حدث خطأ أثناء الحذف");
+            console.log(err);
+        });
+    }
+}
+
+</script>
+
+</body>
+</html>

@@ -1,70 +1,131 @@
 <!doctype html>
-<html>
+<html lang="ar">
 <head>
   <meta charset="utf-8">
-  <title>Maher Phone - Products</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Maher Phone - المنتجات</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
-    body{font-family: Arial, sans-serif; padding: 16px;}
-    #products div{border:1px solid #ddd;padding:8px;margin:8px 0;border-radius:6px;}
+    body{
+        font-family:Arial;
+        direction:rtl;
+        margin:0;
+        background:#f2f2f2;
+    }
+
+    header{
+        background:#2196f3;
+        padding:15px;
+        color:white;
+        text-align:center;
+        font-size:22px;
+        font-weight:bold;
+        position:sticky;
+        top:0;
+    }
+
+    #products{
+        display:grid;
+        grid-template-columns:repeat(auto-fill, minmax(250px, 1fr));
+        gap:15px;
+        padding:15px;
+    }
+
+    .card{
+        background:white;
+        padding:15px;
+        border-radius:10px;
+        box-shadow:0 0 8px #00000022;
+        text-align:center;
+        transition:.3s;
+    }
+
+    .card:hover{
+        transform:scale(1.03);
+    }
+
+    .card img{
+        width:100%;
+        height:220px;
+        object-fit:cover;
+        border-radius:10px;
+    }
+
+    .price{
+        color:#4caf50;
+        font-size:18px;
+        font-weight:bold;
+        margin:10px 0;
+    }
+
+    #logout{
+        position:fixed;
+        bottom:20px;
+        left:20px;
+        padding:10px 15px;
+        border:none;
+        background:red;
+        color:white;
+        border-radius:6px;
+        cursor:pointer;
+        font-size:14px;
+    }
   </style>
 </head>
+
 <body>
 
-  <h1>منتجات Maher Phone</h1>
+<header>📱 Maher Phone - المنتجات</header>
 
-  <button onclick="auth.signOut()">خروج</button>
-  <span id="userInfo"></span>
+<div id="products"></div>
 
-  <div id="products"></div>
+<button id="logout" onclick="logout()">تسجيل خروج</button>
 
-  <hr>
-  <a href="products.html">المنتجات</a>
-  <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="firebase.js"></script>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="firebase.js"></script>
+<script>
 
-  <script>
-    const ADMIN_EMAIL = "clever2251999@gmail.com";
+auth.onAuthStateChanged(user=>{
+    loadProducts();
+});
 
-    auth.onAuthStateChanged(user=>{
-        if(!user){
-            location.href = "index.html";
-            return;
-        }
+function logout(){
+    auth.signOut();
+    location.href="index.html";
+}
 
-        document.getElementById("userInfo").textContent = user.email ? user.email : "زائر";
+function loadProducts(){
+    const container = document.getElementById("products");
+    container.innerHTML = "<p style='text-align:center;width:100%'>جاري تحميل المنتجات...</p>";
 
-        if (user.email === ADMIN_EMAIL) {
-            document.getElementById("adminLink").style.display = "inline";
-        }
+    db.collection("products")
+        .orderBy("createdAt", "desc")
+        .get()
+        .then(snap=>{
+            container.innerHTML = "";
+            snap.forEach(doc=>{
+                let p = doc.data();
 
-        loadProducts();
-    });
-
-    function loadProducts(){
-        const productsDiv = document.getElementById("products");
-
-        db.collection("products").orderBy("createdAt","desc").onSnapshot(snapshot=>{
-          productsDiv.innerHTML = "";
-          snapshot.forEach(doc=>{
-            const p = doc.data();
-            productsDiv.innerHTML += `
-              <div>
-                <h3>${p.name}</h3>
-                <img src="${p.imageURL}" width="120">
-                <p>${p.description || ""}</p>
-                <p>السعر: ${p.price} جنيه</p>
-              </div>
-            `;
-          });
+                container.innerHTML += `
+                    <div class="card">
+                        <img src="${p.imageURL}" alt="">
+                        <h3>${p.name}</h3>
+                        <p>${p.description}</p>
+                        <div class="price">${p.price} جنيه</div>
+                    </div>
+                `;
+            });
+        })
+        .catch(err=>{
+            container.innerHTML = "<p style='color:red;text-align:center'>حدث خطأ أثناء تحميل المنتجات.</p>";
         });
-    }
-  </script>
+}
+
+</script>
 
 </body>
 </html>

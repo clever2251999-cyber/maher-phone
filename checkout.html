@@ -1,0 +1,25 @@
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase.js"></script>
+
+<script>
+async function submitOrder(){
+    let name = document.getElementById("name").value;
+    let phone = document.getElementById("phone").value;
+    let address = document.getElementById("address").value;
+
+    let uid = auth.currentUser.uid;
+
+    await db.collection("orders").add({
+        userId: uid,
+        name,
+        phone,
+        address,
+        createdAt: Date.now()
+    });
+
+    alert("تم إرسال الطلب");
+    location.href = "products.html";
+}
+</script>

@@ -105,6 +105,53 @@
       const uid = auth.currentUser.uid;
       await db.collection('users').doc(uid).collection('cart').doc(cartId).delete();
     };
-  </script>
+  </script>auth.onAuthStateChanged(async (user) => {
+  if (!user) return;
+
+  const userRef = db.collection("users").doc(user.uid);
+  const snap = await userRef.get();
+
+  // عناصر الفورم
+  const nameInput = document.getElementById("name");
+  const phoneInput = document.getElementById("phone");
+  const addressInput = document.getElementById("address");
+  const saveBtn = document.getElementById("saveBtn");
+
+  if (!snap.exists) {
+    // ⛔ حساب جديد → خلّي الحقول فاضية
+    nameInput.value = "";
+    phoneInput.value = "";
+    addressInput.value = "";
+
+    // احفظ البيانات عند الضغط
+    saveBtn.onclick = async () => {
+      await userRef.set({
+        name: nameInput.value,
+        phone: phoneInput.value,
+        address: addressInput.value,
+        uid: user.uid,
+      });
+      alert("تم حفظ بياناتك بنجاح");
+    };
+
+  } else {
+    // ✅ حساب موجود → اعرض البيانات من Firestore
+    const d = snap.data();
+    nameInput.value = d.name || "";
+    phoneInput.value = d.phone || "";
+    addressInput.value = d.address || "";
+
+    // تحديث البيانات
+    saveBtn.onclick = async () => {
+      await userRef.update({
+        name: nameInput.value,
+        phone: phoneInput.value,
+        address: addressInput.value,
+      });
+      alert("تم تحديث بياناتك بنجاح");
+    };
+  }
+});
+
 </body>
 </html>

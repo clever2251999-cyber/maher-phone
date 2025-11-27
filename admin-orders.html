@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8">
+  <title>لوحة الأدمن - الطلبات</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body{
+        font-family:Arial;
+        direction:rtl;
+        margin:0;
+        background:#f2f2f2;
+        padding:15px;
+    }
+
+    h2{
+        text-align:center;
+        color:#2196f3;
+        margin-bottom:20px;
+    }
+
+    .order{
+        background:white;
+        padding:15px;
+        margin:15px 0;
+        border-radius:10px;
+        box-shadow:0 0 8px #00000022;
+    }
+
+    .item{
+        display:flex;
+        gap:10px;
+        background:#fafafa;
+        padding:10px;
+        border-radius:8px;
+        margin:8px 0;
+    }
+
+    .item img{
+        width:80px;
+        height:80px;
+        border-radius:8px;
+        object-fit:cover;
+    }
+
+    .title{
+        font-size:16px;
+        font-weight:bold;
+    }
+
+    .price{
+        color:#4caf50;
+        font-weight:bold;
+    }
+
+    .info{
+        margin-bottom:10px;
+        background:#e3f2fd;
+        padding:10px;
+        border-radius:8px;
+    }
+
+    #logout{
+        position:fixed;
+        bottom:20px;
+        left:20px;
+        padding:10px 15px;
+        border:none;
+        background:red;
+        color:white;
+        border-radius:6px;
+        cursor:pointer;
+        font-size:14px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>📦 جميع طلبات العملاء</h2>
+
+<div id="orders"></div>
+
+<button id="logout" onclick="logout()">خروج</button>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="firebase.js"></script>
+
+<script>
+
+const ADMIN_EMAIL = "clever2251999@gmail.com";
+
+auth.onAuthStateChanged(user=>{
+    if(!user){
+        alert("يجب تسجيل الدخول");
+        location.href = "index.html";
+        return;
+    }
+
+    if(user.email !== ADMIN_EMAIL){
+        alert("غير مسموح بالدخول");
+        location.href = "products.html";
+        return;
+    }
+
+    loadOrders();
+});
+
+function logout(){
+    auth.signOut();
+    location.href = "index.html";
+}
+
+function loadOrders(){
+    const box = document.getElementById("orders");
+    box.innerHTML = "<p style='text-align:center;'>جاري تحميل الطلبات...</p>";
+
+    db.collection("orders")
+      .orderBy("createdAt", "desc")
+      .onSnapshot(snap=>{
+        
+        box.innerHTML = "";
+
+        if(snap.empty){
+            box.innerHTML = "<p style='text-align:center;color:#555'>لا توجد طلبات حتى الآن</p>";
+            return;
+        }
+
+        snap.forEach(doc=>{
+            let o = doc.data();
+
+            let html = `
+                <div class="order">
+                    <div class="info">
+                        <div><strong>👤 الاسم:</strong> ${o.name}</div>
+                        <div><strong>📞 الموبايل:</strong> ${o.phone}</div>
+                        <div><strong>📍 العنوان:</strong> ${o.address}</div>
+                        <div><strong>⏱ بتاريخ:</strong> ${o.createdAt?.toDate().toLocaleString() || ""}</div>
+                    </div>
+
+                    <h4>المنتجات:</h4>
+            `;
+
+            o.items.forEach(item=>{
+                html += `
+                    <div class="item">
+                        <img src="${item.imageURL}">
+                        <div>
+                            <div class="title">${item.name}</div>
+                            <div class="price">${item.price} جنيه</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+
+            box.innerHTML += html;
+        });
+
+      });
+}
+
+</script>
+
+</body>
+</html>

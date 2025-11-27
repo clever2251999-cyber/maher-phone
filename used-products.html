@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>الهواتف المستعملة</title>
-    <link rel="stylesheet" href="styles.css" />
+
     <style>
-        body { font-family: sans-serif; background: #f5f5f5; }
-        header { background: #222; padding: 15px; color: #fff; text-align: center; }
+        body { font-family: sans-serif; background: #f5f5f5; margin:0; }
+        header { background: #222; padding: 15px; color: #fff; text-align: center; font-size:22px; }
         .container { width: 90%; margin: auto; padding: 20px; }
         .products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
         .product-card { background: #fff; border-radius: 10px; padding: 10px; box-shadow: 0 0 5px #ccc; }
@@ -18,7 +18,7 @@
 <body>
 
 <header>
-    <h1>الهواتف المستعملة</h1>
+    الهواتف المستعملة
 </header>
 
 <div class="container">
@@ -26,42 +26,47 @@
     <div class="products-grid" id="productsContainer"></div>
 </div>
 
-<script type="module">
-    import { db } from './firebase.js';
-    import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase.js"></script>
 
+<script>
     const productsContainer = document.getElementById("productsContainer");
     const loading = document.getElementById("loading");
 
-    async function loadUsedProducts() {
-        try {
-            const querySnapshot = await getDocs(collection(db, "usedProducts"));
+    function loadUsedProducts() {
+        db.collection("usedProducts")
+            .orderBy("createdAt", "desc")
+            .get()
+            .then(snapshot => {
 
-            loading.style.display = "none";
+                loading.style.display = "none";
 
-            if (querySnapshot.empty) {
-                productsContainer.innerHTML = "<p style='text-align:center;'>لا توجد منتجات حالياً.</p>";
-                return;
-            }
+                if (snapshot.empty) {
+                    productsContainer.innerHTML = "<p style='text-align:center;'>لا توجد منتجات حالياً.</p>";
+                    return;
+                }
 
-            querySnapshot.forEach(doc => {
-                const p = doc.data();
+                snapshot.forEach(doc => {
+                    const p = doc.data();
 
-                const card = document.createElement("div");
-                card.className = "product-card";
+                    const card = document.createElement("div");
+                    card.className = "product-card";
 
-                card.innerHTML = `
-                    <img src="${p.imageURL}" alt="Product Image">
-                    <h3>${p.name}</h3>
-                    <p>${p.description}</p>
-                    <strong>${p.price} ج.م</strong>
-                `;
+                    card.innerHTML = `
+                        <img src="${p.imageURL}" alt="Product Image">
+                        <h3>${p.name}</h3>
+                        <p>${p.description}</p>
+                        <strong>${p.price} ج.م</strong>
+                    `;
 
-                productsContainer.appendChild(card);
+                    productsContainer.appendChild(card);
+                });
+            })
+            .catch(() => {
+                loading.innerText = "حدث خطأ أثناء تحميل المنتجات";
             });
-        } catch (e) {
-            loading.innerText = "حدث خطأ أثناء تحميل المنتجات";
-        }
     }
 
     loadUsedProducts();

@@ -5,68 +5,141 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>الهواتف المستعملة</title>
 
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+
     <style>
-        body { font-family: sans-serif; background: #f5f5f5; margin:0; }
-        header { background: #222; padding: 15px; color: #fff; text-align: center; font-size:22px; }
-        .container { width: 90%; margin: auto; padding: 20px; }
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
-        .product-card { background: #fff; border-radius: 10px; padding: 10px; box-shadow: 0 0 5px #ccc; }
-        .product-card img { width: 100%; border-radius: 8px; }
-        .loading { text-align: center; padding: 20px; font-size: 20px; color: #333; }
+        body {
+            font-family: "Cairo", sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+        }
+
+        header {
+            background: #222;
+            padding: 15px;
+            color: #fff;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .container {
+            width: 90%;
+            margin: auto;
+            padding: 20px;
+        }
+
+        /* زر إضافة منتج مستعمل */
+        .add-btn {
+            background: #0d6efd;
+            color: white;
+            padding: 12px 22px;
+            border: none;
+            border-radius: 16px;
+            font-size: 18px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px #00000020;
+            margin: 15px auto;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 18px;
+            margin-top: 15px;
+        }
+
+        .product-card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 12px;
+            box-shadow: 0 0 6px #ccc;
+            text-align: center;
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 20px;
+            color: #333;
+        }
     </style>
 </head>
 <body>
 
 <header>
-    الهواتف المستعملة
+    📱 الهواتف المستعملة
 </header>
 
 <div class="container">
+
+    <!-- زر إضافة منتج مستعمل -->
+    <div style="text-align:center;">
+        <button class="add-btn" onclick="location.href='add-used-product.html'">
+            ➕ إضافة تليفون مستعمل
+        </button>
+    </div>
+
+    <!-- التحميل -->
     <div id="loading" class="loading">جارٍ تحميل المنتجات...</div>
+
+    <!-- المنتجات -->
     <div class="products-grid" id="productsContainer"></div>
+
 </div>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <script src="firebase.js"></script>
 
 <script>
     const productsContainer = document.getElementById("productsContainer");
     const loading = document.getElementById("loading");
 
-    function loadUsedProducts() {
-        db.collection("usedProducts")
-            .orderBy("createdAt", "desc")
-            .get()
-            .then(snapshot => {
+    async function loadUsedProducts() {
+        try {
+            const querySnapshot = await db.collection("usedProducts")
+                                         .orderBy("createdAt", "desc")
+                                         .get();
 
-                loading.style.display = "none";
+            loading.style.display = "none";
 
-                if (snapshot.empty) {
-                    productsContainer.innerHTML = "<p style='text-align:center;'>لا توجد منتجات حالياً.</p>";
-                    return;
-                }
+            if (querySnapshot.empty) {
+                productsContainer.innerHTML =
+                "<p style='text-align:center; font-size:18px;'>لا توجد منتجات حالياً.</p>";
+                return;
+            }
 
-                snapshot.forEach(doc => {
-                    const p = doc.data();
+            querySnapshot.forEach(doc => {
+                const p = doc.data();
 
-                    const card = document.createElement("div");
-                    card.className = "product-card";
+                const card = document.createElement("div");
+                card.className = "product-card";
 
-                    card.innerHTML = `
-                        <img src="${p.imageURL}" alt="Product Image">
-                        <h3>${p.name}</h3>
-                        <p>${p.description}</p>
-                        <strong>${p.price} ج.م</strong>
-                    `;
+                card.innerHTML = `
+                    <img src="${p.imageURL}" alt="Product Image">
+                    <h3>${p.name}</h3>
+                    <p>${p.specs || ''}</p>
+                    <strong>${p.price} ج.م</strong>
+                `;
 
-                    productsContainer.appendChild(card);
-                });
-            })
-            .catch(() => {
-                loading.innerText = "حدث خطأ أثناء تحميل المنتجات";
+                productsContainer.appendChild(card);
             });
+        } catch (e) {
+            loading.innerText = "حدث خطأ أثناء تحميل المنتجات";
+        }
     }
 
     loadUsedProducts();

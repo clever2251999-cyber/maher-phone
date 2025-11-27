@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="ar">
 <head>
   <meta charset="utf-8">
   <title>Admin - Add Product</title>
@@ -7,13 +7,13 @@
 
 <body>
   <h1>لوحة الأدمن - أضف منتج</h1>
-  <div id="authStatus"></div>
+  <div id="authStatus" style="margin-bottom:15px; color:red; font-weight:bold;"></div>
 
-  <form id="productForm">
-    <input id="pname" placeholder="اسم المنتج" required><br>
-    <textarea id="pdesc" placeholder="الوصف"></textarea><br>
-    <input id="pprice" placeholder="السعر" type="number" required><br>
-    <input id="pimage" type="file" accept="image/*" required><br>
+  <form id="productForm" style="display:none">
+    <input id="pname" placeholder="اسم المنتج" required><br><br>
+    <textarea id="pdesc" placeholder="الوصف"></textarea><br><br>
+    <input id="pprice" placeholder="السعر" type="number" required><br><br>
+    <input id="pimage" type="file" accept="image/*" required><br><br>
     <button type="submit">أضف المنتج</button>
   </form>
 
@@ -26,7 +26,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
   <script>
-    // إعدادات Firebase
+
     const firebaseConfig = {
       apiKey: "AIzaSyAAYSyJf1YPFU7bXB87hKuPSUzJ53G0tt4",
       authDomain: "maher-phone-18581.firebaseapp.com",
@@ -49,16 +49,18 @@
 
     auth.onAuthStateChanged((user) => {
       if (!user) {
-        authStatus.textContent = "سجّل الدخول من الصفحة الرئيسية أولاً.";
-        productForm.style.display = "none";
+        authStatus.textContent = "يجب تسجيل الدخول أولاً من الصفحة الرئيسية.";
         return;
       }
 
-      authStatus.textContent = "أدخل بواسطة: " + user.email;
+      authStatus.style.color = "green";
+      authStatus.textContent = "مسجّل دخول: " + user.email;
 
-      if (user.email !== ADMIN_EMAIL) {
+      if (user.email === ADMIN_EMAIL) {
+        productForm.style.display = "block";
+      } else {
+        authStatus.style.color = "red";
         authStatus.textContent += " — ليس لديك صلاحية الأدمن.";
-        productForm.style.display = "none";
       }
     });
 
@@ -77,26 +79,31 @@
       const file = document.getElementById("pimage").files[0];
 
       if (!file) {
-        alert("اختر صورة");
+        alert("اختر صورة للمنتج");
         return;
       }
 
-      // رفع الصورة
-      const storageRef = storage.ref().child("product_images/" + Date.now() + "_" + file.name);
-      const snap = await storageRef.put(file);
-      const imageURL = await snap.ref.getDownloadURL();
+      try {
+        // رفع الصورة
+        const storageRef = storage.ref("product_images/" + Date.now() + "_" + file.name);
+        const snap = await storageRef.put(file);
+        const imageURL = await snap.ref.getDownloadURL();
 
-      // إضافة المنتج
-      await db.collection("products").add({
-        name,
-        description: desc,
-        price,
-        imageURL,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
+        // إضافة البيانات
+        await db.collection("products").add({
+          name,
+          description: desc,
+          price,
+          imageURL,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
 
-      alert("تمت إضافة المنتج بنجاح");
-      productForm.reset();
+        alert("تمت إضافة المنتج بنجاح");
+        productForm.reset();
+
+      } catch (err) {
+        alert("خطأ: " + err.message);
+      }
     };
   </script>
 

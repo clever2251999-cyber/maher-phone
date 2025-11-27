@@ -2,46 +2,52 @@
 <html lang="ar">
 <head>
   <meta charset="utf-8">
-  <title>هواتف مستعملة</title>
+  <title>تليفونات مستعملة</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
-
   <style>
-    body{ font-family:"Cairo"; direction:rtl; margin:0; background:#f3f4f6; }
+    body{
+        font-family:"Cairo", sans-serif;
+        direction:rtl;
+        margin:0;
+        background:#f3f4f6;
+    }
 
     header{
         background:white;
         padding:20px;
-        font-size:26px;
-        font-weight:700;
+        color:#000;
         text-align:center;
-        box-shadow:0 2px 10px #00000010;
+        font-size:28px;
+        font-weight:700;
         position:sticky;
         top:0;
         z-index:10;
+        box-shadow:0 2px 10px #00000010;
     }
 
     #adminPanel{
-        text-align:center;
         padding:20px;
+        text-align:center;
         display:none;
     }
 
     #adminPanel button{
         padding:12px 20px;
+        font-size:17px;
         border:none;
+        border-radius:14px;
         background:#0d6efd;
         color:white;
-        border-radius:14px;
         cursor:pointer;
-        font-size:17px;
+        margin-bottom:10px;
     }
 
     #products{
         display:grid;
-        grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
-        gap:25px;
+        grid-template-columns:repeat(auto-fill, minmax(270px, 1fr));
+        gap:28px;
         padding:30px;
         max-width:1300px;
         margin:auto;
@@ -50,27 +56,62 @@
     .card{
         background:white;
         padding:18px;
-        border-radius:18px;
+        border-radius:20px;
         box-shadow:0 4px 20px #00000012;
         text-align:center;
+        transition:0.3s;
+        cursor:pointer;
     }
 
     .card img{
         width:100%;
-        height:220px;
+        height:240px;
         object-fit:cover;
-        border-radius:14px;
+        border-radius:16px;
     }
 
     .btn{
         background:#111;
         color:white;
-        padding:10px;
+        padding:12px;
+        border:none;
+        border-radius:14px;
+        cursor:pointer;
         width:100%;
-        font-size:16px;
+        font-size:17px;
+        font-weight:600;
+        margin-top:12px;
+    }
+
+    .del-btn{
+        background:#d9534f;
+        margin-top:10px;
+    }
+
+    #cart-btn{
+        position:fixed;
+        bottom:20px;
+        right:20px;
+        padding:16px 22px;
+        background:#111;
+        color:white;
+        border:none;
+        border-radius:50px;
+        font-size:17px;
+        cursor:pointer;
+        box-shadow:0 0 18px #00000030;
+    }
+
+    #logout{
+        position:fixed;
+        bottom:20px;
+        left:20px;
+        padding:14px 20px;
+        background:#d9534f;
+        color:white;
         border:none;
         border-radius:12px;
-        margin-top:10px;
+        font-size:16px;
         cursor:pointer;
     }
   </style>
@@ -79,11 +120,14 @@
 
 <header>📱 تليفونات مستعملة</header>
 
+<!-- لوحة تحكم الأدمن -->
 <div id="adminPanel">
     <button onclick="location.href='add-used-product.html'">➕ إضافة هاتف مستعمل</button>
 </div>
 
 <div id="products"></div>
+<button id="cart-btn" onclick="goCart()">🛒 السلة</button>
+<button id="logout" onclick="logout()">تسجيل خروج</button>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -94,50 +138,71 @@
 
 const ADMIN_EMAIL = "clever2251999@gmail.com";
 
-auth.onAuthStateChanged(user=>{
-    if(!user) return;
+auth.onAuthStateChanged(user => {
+    if (!user) return;
 
-    // إظهار زر إضافة منتج للأدمن فقط
-    if(!user.isAnonymous && user.email === ADMIN_EMAIL){
+    // ⭐ الأدمن فقط يرى لوحة الإضافة
+    if (!user.isAnonymous && user.email === ADMIN_EMAIL) {
         document.getElementById("adminPanel").style.display = "block";
     }
 
-    loadUsed();
+    loadProducts(user);
 });
 
-function loadUsed(){
-    let container = document.getElementById("products");
-    container.innerHTML = "جاري تحميل الهواتف...";
+function logout(){ auth.signOut(); location.href="index.html"; }
+function goCart(){ location.href = "cart.html"; }
 
-    db.collection("products")
-      .where("type", "==", "used")
+function addToCart(item){
+    let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    cart.push(item);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    alert("✔ تم إضافة المنتج إلى السلة");
+}
+
+function deleteProduct(id){
+    if (confirm("هل تريد حذف هذا المنتج؟")) {
+        db.collection("usedProducts").doc(id).delete().then(() => {
+            alert("✔ تم الحذف");
+            location.reload();
+        });
+    }
+}
+
+function loadProducts(user){
+    const container = document.getElementById("products");
+    container.innerHTML = "<p style='width:100%;text-align:center'>جاري تحميل المنتجات...</p>";
+
+    db.collection("usedProducts")
+      .orderBy("createdAt", "desc")
       .get()
       .then(snap=>{
           container.innerHTML = "";
+
           snap.forEach(doc=>{
               let p = doc.data();
+              let delBtn = "";
+
+              // ⭐ زر الحذف يظهر فقط للأدمن
+              if (user && !user.isAnonymous && user.email === ADMIN_EMAIL) {
+                delBtn = `<button class="btn del-btn" onclick="deleteProduct('${doc.id}')">🗑 حذف المنتج</button>`;
+              }
 
               container.innerHTML += `
                 <div class="card">
                     <img src="${p.imageURL}">
                     <h3>${p.name}</h3>
                     <p>${p.description}</p>
-                    <b>${p.price} جنيه</b>
+                    <div class="price">${p.price} جنيه</div>
 
-                    <button class="btn" onclick='addToCart(${JSON.stringify({id:doc.id, name:p.name, price:p.price, imageURL:p.imageURL})})'>
-                      🛒 إضافة إلى السلة
+                    <button class="btn" onclick='addToCart(${JSON.stringify({ id: doc.id, name: p.name, price: p.price, imageURL: p.imageURL })})'>
+                        🛒 إضافة إلى السلة
                     </button>
+
+                    ${delBtn}
                 </div>
               `;
           });
       });
-}
-
-function addToCart(item){
-    let cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    cart.push(item);
-    localStorage.setItem("cart", JSON.stringify(cart));
-    alert("✔ تمت الإضافة للسلة");
 }
 
 </script>

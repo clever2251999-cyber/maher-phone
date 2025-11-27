@@ -1,121 +1,146 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>إضافة تليفون مستعمل</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>إضافة تليفون مستعمل</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
 
-<style>
-    body{
-        font-family:"Cairo", sans-serif;
-        direction:rtl;
-        background:#f3f4f6;
-        margin:0;
-        padding:0;
-    }
+        .container {
+            width: 90%;
+            max-width: 450px;
+            margin: 30px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px #00000015;
+        }
 
-    .container{
-        max-width:500px;
-        margin:30px auto;
-        background:white;
-        padding:25px;
-        border-radius:20px;
-        box-shadow:0 4px 20px #00000020;
-    }
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
 
-    h2{
-        text-align:center;
-        margin-bottom:20px;
-    }
+        label {
+            font-weight: bold;
+        }
 
-    input, textarea{
-        width:100%;
-        padding:12px;
-        margin:10px 0;
-        border:1px solid #ccc;
-        border-radius:12px;
-        font-size:16px;
-    }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #bbb;
+            border-radius: 10px;
+            font-size: 16px;
+        }
 
-    button{
-        width:100%;
-        padding:14px;
-        background:#111;
-        color:white;
-        border:none;
-        border-radius:14px;
-        font-size:18px;
-        cursor:pointer;
-        margin-top:10px;
-    }
+        textarea {
+            height: 120px;
+            resize: none;
+        }
 
-    #backBtn{
-        background:#d9534f;
-        margin-top:12px;
-    }
-</style>
+        button {
+            width: 100%;
+            background: #111;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 18px;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: .8;
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 17px;
+        }
+    </style>
 </head>
+
 <body>
 
-<div class="container">
-    <h2>➕ إضافة تليفون مستعمل</h2>
+    <div class="container">
+        <h2>➕ إضافة تليفون مستعمل</h2>
 
-    <input type="text" id="name" placeholder="اسم التليفون" required>
-    <input type="number" id="price" placeholder="السعر" required>
-    <textarea id="specs" placeholder="المواصفات" rows="4"></textarea>
+        <label>اسم التليفون</label>
+        <input type="text" id="name" placeholder="مثال: iPhone 11">
 
-    <label>📷 صورة التليفون</label>
-    <input type="file" id="image" accept="image/*">
+        <label>السعر</label>
+        <input type="number" id="price" placeholder="مثال: 8500">
 
-    <button onclick="addUsedProduct()">✔ إضافة المنتج</button>
-    <button id="backBtn" onclick="history.back()">رجوع</button>
-</div>
+        <label>المواصفات</label>
+        <textarea id="details" placeholder="حالة ممتازة، بطارية 90%..."></textarea>
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-<script src="firebase.js"></script>
+        <label>صورة التليفون</label>
+        <input type="file" id="image" accept="image/*">
 
-<script>
+        <button onclick="addUsedProduct()">إضافة المنتج</button>
 
-function addUsedProduct(){
-    let name = document.getElementById("name").value;
-    let price = document.getElementById("price").value;
-    let specs = document.getElementById("specs").value;
-    let imageFile = document.getElementById("image").files[0];
+        <p class="message" id="msg"></p>
+    </div>
 
-    if(!name || !price){
-        alert("⚠ يرجى إدخال الاسم والسعر");
-        return;
-    }
+    <script type="module">
+        import { db, storage } from "./firebase.js";
+        import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { ref, uploadBytes, getDownloadURL }
+            from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-    if(!imageFile){
-        alert("⚠ يرجى اختيار صورة");
-        return;
-    }
+        window.addUsedProduct = async function () {
 
-    // رفع الصورة
-    let ref = storage.ref("usedProducts/" + Date.now() + "_" + imageFile.name);
-    ref.put(imageFile).then(()=> ref.getDownloadURL()).then(imageURL => {
+            const msg = document.getElementById("msg");
+            msg.innerText = "";
 
-        // حفظ في Firestore
-        db.collection("usedProducts").add({
-            name,
-            price,
-            specs,
-            imageURL,
-            createdAt: Date.now()
-        }).then(()=>{
-            alert("✔ تمت إضافة التليفون المستعمل");
-            location.href = "used-products.html";
-        });
+            const name = document.getElementById("name").value;
+            const price = document.getElementById("price").value;
+            const details = document.getElementById("details").value;
+            const imageFile = document.getElementById("image").files[0];
 
-    });
-}
+            if (!name || !price || !details || !imageFile) {
+                msg.innerText = "⚠ جميع الحقول مطلوبة";
+                msg.style.color = "red";
+                return;
+            }
 
-</script>
+            msg.innerText = "⏳ جاري رفع الصورة...";
+            msg.style.color = "black";
+
+            // رفع الصورة
+            const imageRef = ref(storage, "usedProducts/" + Date.now() + "_" + imageFile.name);
+            await uploadBytes(imageRef, imageFile);
+            const imageURL = await getDownloadURL(imageRef);
+
+            // حفظ البيانات
+            await addDoc(collection(db, "usedProducts"), {
+                name,
+                price,
+                details,
+                image: imageURL,
+                createdAt: new Date().toISOString()
+            });
+
+            msg.innerText = "✅ تم إضافة المنتج بنجاح!";
+            msg.style.color = "green";
+
+            // تفريغ الحقول
+            document.getElementById("name").value = "";
+            document.getElementById("price").value = "";
+            document.getElementById("details").value = "";
+            document.getElementById("image").value = "";
+        };
+    </script>
 
 </body>
 </html>

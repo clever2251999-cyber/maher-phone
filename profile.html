@@ -1,0 +1,110 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>صفحتي</title></head>
+<body>
+  <h1>صفحتي الشخصية</h1>
+  <div id="authInfo"></div>
+
+  <h3>تعبئة بيانات الحساب</h3>
+  <input id="name" placeholder="الاسم"><br>
+  <input id="phone" placeholder="الهاتف"><br>
+  <input id="address" placeholder="العنوان"><br>
+  <button id="saveProfile">احفظ البيانات</button>
+
+  <h3>سلة المشتريات</h3>
+  <div id="cart"></div>
+
+  <a href="index.html">العودة للمنتجات</a>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    // ====== ضع هنا إعدادات Firebase من مشروعك (web app config) ======
+    const firebaseConfig = {
+      apiKey: "API_KEY",
+      authDomain: "PROJECT_ID.firebaseapp.com",
+      projectId: "PROJECT_ID",
+      storageBucket: "PROJECT_ID.appspot.com",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const authInfo = document.getElementById('authInfo');
+    const nameEl = document.getElementById('name');
+    const phoneEl = document.getElementById('phone');
+    const addressEl = document.getElementById('address');
+    const saveBtn = document.getElementById('saveProfile');
+    const cartDiv = document.getElementById('cart');
+
+    auth.onAuthStateChanged(async user => {
+      if (!user) {
+        authInfo.innerHTML = 'رجاءً سجل الدخول في الصفحة الرئيسية.';
+        return;
+      }
+      authInfo.innerHTML = 'مرحبًا: ' + user.email;
+      // جلب بيانات المستخدم إن وجدت
+      const userDoc = await db.collection('users').doc(user.uid).get();
+      if (userDoc.exists) {
+        const d = userDoc.data();
+        nameEl.value = d.name || '';
+        phoneEl.value = d.phone || '';
+        addressEl.value = d.address || '';
+      }
+      // استماع مباشر للسلة
+      db.collection('users').doc(user.uid).collection('cart').onSnapshot(snap => {
+        cartDiv.innerHTML = '';
+        let total = 0;
+        snap.forEach(doc => {
+          const it = doc.data();
+          total += (it.price * it.qty);
+          const el = document.createElement('div');
+          el.innerHTML = `${it.name} - ${it.qty} - ${it.price} جنيه 
+            <button onclick="inc('${doc.id}')">+</button>
+            <button onclick="dec('${doc.id}')">-</button>
+            <button onclick="removeItem('${doc.id}')">حذف</button>`;
+          cartDiv.appendChild(el);
+        });
+        const totEl = document.createElement('div');
+        totEl.innerHTML = `<strong>المجموع: ${total} جنيه</strong>`;
+        cartDiv.appendChild(totEl);
+      });
+    });
+
+    saveBtn.onclick = async () => {
+      const user = auth.currentUser;
+      if (!user) { alert('سجّل الدخول'); return; }
+      await db.collection('users').doc(user.uid).set({
+        name: nameEl.value,
+        phone: phoneEl.value,
+        address: addressEl.value,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      alert('تم حفظ البيانات');
+    };
+
+    // وظائف تعديل سلة (تستدعي نفس المسار)
+    window.inc = async (cartId) => {
+      const uid = auth.currentUser.uid;
+      await db.collection('users').doc(uid).collection('cart').doc(cartId).update({ qty: firebase.firestore.FieldValue.increment(1) });
+    };
+    window.dec = async (cartId) => {
+      const uid = auth.currentUser.uid;
+      const ref = db.collection('users').doc(uid).collection('cart').doc(cartId);
+      const doc = await ref.get();
+      if (!doc.exists) return;
+      const qty = doc.data().qty || 1;
+      if (qty <= 1) await ref.delete();
+      else await ref.update({ qty: firebase.firestore.FieldValue.increment(-1) });
+    };
+    window.removeItem = async (cartId) => {
+      const uid = auth.currentUser.uid;
+      await db.collection('users').doc(uid).collection('cart').doc(cartId).delete();
+    };
+  </script>
+</body>
+</html>

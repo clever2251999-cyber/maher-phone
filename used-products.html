@@ -41,7 +41,7 @@
         .add-btn-container {
             text-align: center;
             margin: 20px;
-            display: none; /* مخفي إلا لو أدمن */
+            display: none; /* يظهر فقط للأدمن */
         }
 
         .add-btn {
@@ -65,7 +65,7 @@
 
     <h2>📱 قائمة التليفونات المستعملة</h2>
 
-    <!-- زر إضافة منتج مستعمل (يظهر للادمن فقط) -->
+    <!-- زر إضافة منتج مستعمل (يظهر للأدمن فقط) -->
     <div id="addUsedProductBtn" class="add-btn-container">
         <a href="add-used-product.html" class="add-btn">➕ إضافة تليفون مستعمل</a>
     </div>
@@ -74,6 +74,12 @@
     <div class="product-list" id="usedProductsList">
         <!-- يتم تحميل المنتجات من Firebase -->
     </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="firebase.js"></script>
 
     <script type="module">
         import { db } from "./firebase.js";
@@ -102,13 +108,17 @@
         loadUsedProducts();
     </script>
 
-    <!-- إظهار زر الأدمن -->
+    <!-- كشف الأدمن مثل الصفحة الرئيسية -->
     <script>
-        const isAdmin = localStorage.getItem("isAdmin");
+        const ADMIN_EMAIL = "clever2251999@gmail.com";
 
-        if (isAdmin === "true") {
-            document.getElementById("addUsedProductBtn").style.display = "block";
-        }
+        auth.onAuthStateChanged(user => {
+            if (!user) return;
+
+            if (!user.isAnonymous && user.email === ADMIN_EMAIL) {
+                document.getElementById("addUsedProductBtn").style.display = "block";
+            }
+        });
     </script>
 
 </body>

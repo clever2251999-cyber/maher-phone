@@ -1,42 +1,99 @@
+<!doctype html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8">
+  <title>لوحة الأدمن - إضافة منتج</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body{font-family:Arial;padding:20px}
+    input,textarea{width:100%;padding:8px;margin:6px 0}
+    button{padding:10px 20px}
+  </style>
+</head>
+<body>
+
+<h2>لوحة الأدمن</h2>
+<div id="status" style="color:red;font-weight:bold;margin-bottom:15px"></div>
+
+<form id="form" style="display:none">
+  <input id="name" placeholder="اسم المنتج" required>
+  <textarea id="desc" placeholder="وصف المنتج"></textarea>
+  <input id="price" type="number" placeholder="السعر" required>
+  <input id="image" type="file" accept="image/*" required>
+  <button type="submit">إضافة المنتج</button>
+</form>
+
+<a href="products.html">عرض المنتجات</a>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase.js"></script>
+
 <script>
 const ADMIN = "clever2251999@gmail.com";
-const authStatus = document.getElementById('authStatus');
-const productForm = document.getElementById('productForm');
-
-const storage = firebase.storage();   <!-- ★★ السطر المهم ★★ -->
 
 auth.onAuthStateChanged(user=>{
-  if(!user){ authStatus.textContent = "سجل دخول أولاً من الصفحة الرئيسية."; return; }
-  if(!user.email || user.email !== ADMIN){ authStatus.textContent = "ليس لديك صلاحية."; return; }
-  authStatus.style.color = 'green';
-  authStatus.textContent = 'أدمن: ' + user.email;
-  productForm.style.display = 'block';
+    if(!user){
+        document.getElementById("status").textContent = "يجب تسجيل الدخول أولاً";
+        return;
+    }
+
+    if(user.email !== ADMIN){
+        document.getElementById("status").textContent = "ليس لديك صلاحية الأدمن";
+        return;
+    }
+
+    document.getElementById("status").style.color = "green";
+    document.getElementById("status").textContent = "مرحباً أدمن: " + user.email;
+    document.getElementById("form").style.display = "block";
 });
 
-productForm.onsubmit = async (e) => {
-  e.preventDefault();
-  const name = document.getElementById('pname').value.trim();
-  const desc = document.getElementById('pdesc').value.trim();
-  const price = parseFloat(document.getElementById('pprice').value);
-  const file = document.getElementById('pimage').files[0];
+function uploadToGithubFolder(file){
+    return new Promise(resolve=>{
+        const fileName = Date.now() + "_" + file.name;
 
-  if(!file) return alert('اختر صورة');
+        const url = `https://raw.githubusercontent.com/clever2251999-cyber/maher-phone/main/images/${fileName}`;
 
-  try{
-    const storageRef = storage.ref().child('product_images/' + Date.now() + '_' + file.name);
-    const snap = await storageRef.put(file);
-    const url = await snap.ref.getDownloadURL();
+        resolve(url);
+    });
+}
 
-    await db.collection('products').add({
-      name,
-      description: desc,
-      price,
-      imageURL: url,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+document.getElementById("form").onsubmit = async (e)=>{
+    e.preventDefault();
+
+    const name  = document.getElementById("name").value;
+    const desc  = document.getElementById("desc").value;
+    const price = parseFloat(document.getElementById("price").value);
+    const file  = document.getElementById("image").files[0];
+
+    if(!file) return alert("اختر صورة أولاً");
+
+    const fileName = Date.now() + "_" + file.name;
+
+    const uploadURL = `https://raw.githubusercontent.com/clever2251999-cyber/maher-phone/main/images/${fileName}`;
+
+    alert("⚠️ خذ بالك!\nارفع الصورة الآن بنفس الاسم التالي داخل images:\n\n" + fileName);
+
+    const confirmUpload = confirm("هل رفعت الصورة داخل images؟");
+
+    if(!confirmUpload){
+        return alert("ارفع الصورة أولاً!");
+    }
+
+    await db.collection("products").add({
+        name,
+        description: desc,
+        price,
+        imageURL: uploadURL,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    alert('تمت إضافة المنتج');
-    productForm.reset();
-  } catch(e){ alert(e.message); }
+    alert("✅ تم إضافة المنتج بنجاح!");
+    e.target.reset();
 };
 </script>
+
+</body>
+</html>

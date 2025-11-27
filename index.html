@@ -1,44 +1,56 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html>
 <head>
   <meta charset="utf-8">
-  <title>Maher Phone - تسجيل دخول</title>
+  <title>Maher Phone - Products</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    body{font-family: Arial, sans-serif; padding: 16px; direction: rtl;}
-    input{padding:8px;margin:6px 0;display:block;width:100%;max-width:360px;}
-    button{padding:8px 12px;margin:6px 4px;}
+    body{font-family: Arial, sans-serif; padding: 16px;}
+    #products div{border:1px solid #ddd;padding:8px;margin:8px 0;border-radius:6px;}
   </style>
 </head>
 <body>
-  <h1>Maher Phone</h1>
+  <h1>منتجات Maher Phone</h1>
+
   <div id="auth">
-    <input id="email" placeholder="Email" type="email">
+    <input id="email" placeholder="Email">
     <input id="password" placeholder="Password" type="password">
     <button id="btnSignUp">سجل</button>
     <button id="btnSignIn">دخول</button>
     <button id="btnGuest">دخول زائر</button>
     <button id="btnSignOut" style="display:none;">خروج</button>
-    <div id="userInfo" style="margin-top:8px;"></div>
+    <span id="userInfo"></span>
   </div>
 
+  <div id="products"></div>
+
   <hr>
-  <a href="products.html">عرض المنتجات</a> |
-  <a href="cart.html">السلة</a> |
-  <a href="profile.html">صفحتي</a> |
+  <a href="profile.html">صفحتي</a>
+  <a href="products.html">المنتجات</a>
   <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
 
-  <!-- Firebase SDKs -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-
-  <script src="firebase.js"></script>
 
   <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAYSyJf1YPFU7bXB87hKuPSUzJ53G0tt4",
+      authDomain: "maher-phone-18581.firebaseapp.com",
+      projectId: "maher-phone-18581",
+      storageBucket: "maher-phone-18581.appspot.com",
+      messagingSenderId: "452858222210",
+      appId: "1:452858222210:web:12fa439652c4aa0b48869b"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
     const emailEl = document.getElementById('email');
     const passEl = document.getElementById('password');
+
     const btnSignUp = document.getElementById('btnSignUp');
     const btnSignIn = document.getElementById('btnSignIn');
     const btnGuest = document.getElementById('btnGuest');
@@ -48,45 +60,89 @@
 
     const ADMIN_EMAIL = "clever2251999@gmail.com";
 
+    // تسجيل جديد
     btnSignUp.onclick = async () => {
       const email = emailEl.value.trim();
       const pass = passEl.value.trim();
-      if (!email || !pass) return alert("ادخل البريد وكلمة المرور");
-      if (!email.includes("@")) return alert("صيغة البريد غير صحيحة");
-      try { await auth.createUserWithEmailAndPassword(email, pass); alert("تم التسجيل بنجاح"); }
-      catch(e){ alert(e.message); }
+
+      if (!email || !pass) return alert("ادخل البريد والرقم السري");
+      if (!email.includes("@") || !email.includes(".")) return alert("صيغة البريد غير صحيحة");
+
+      try {
+        await auth.createUserWithEmailAndPassword(email, pass);
+        alert("تم التسجيل بنجاح");
+      } catch (e) {
+        alert(e.message);
+      }
     };
 
+    // تسجيل دخول
     btnSignIn.onclick = async () => {
       const email = emailEl.value.trim();
       const pass = passEl.value.trim();
-      if (!email || !pass) return alert("ادخل البريد وكلمة المرور");
-      try { await auth.signInWithEmailAndPassword(email, pass); }
-      catch(e){ alert(e.message); }
+
+      try {
+        await auth.signInWithEmailAndPassword(email, pass);
+        alert("تم تسجيل الدخول");
+      } catch (e) {
+        alert(e.message);
+      }
     };
 
+    // دخول زائر
     btnGuest.onclick = async () => {
-      try { await auth.signInAnonymously(); }
-      catch(e){ alert(e.message); }
+      try {
+        await auth.signInAnonymously();
+        alert("دخلت كزائر");
+      } catch (e) {
+        alert(e.message);
+      }
     };
 
+    // خروج
     btnSignOut.onclick = () => auth.signOut();
 
+    // متابعة حالة المستخدم
     auth.onAuthStateChanged(user => {
       if (user) {
         userInfo.textContent = user.email ? user.email : "زائر";
-        btnSignOut.style.display = 'inline';
-        btnSignIn.style.display = 'none';
-        btnSignUp.style.display = 'none';
-        if (user.email === ADMIN_EMAIL) adminLink.style.display = 'inline';
-        else adminLink.style.display = 'none';
+
+        btnSignOut.style.display = "inline";
+        btnSignIn.style.display = "none";
+        btnSignUp.style.display = "none";
+
+        // إظهار رابط الأدمن
+        if (!user.email) {
+          adminLink.style.display = "none";
+        } else if (user.email === ADMIN_EMAIL) {
+          adminLink.style.display = "inline";
+        }
+
       } else {
-        userInfo.textContent = 'غير مسجل';
-        btnSignOut.style.display = 'none';
-        btnSignIn.style.display = 'inline';
-        btnSignUp.style.display = 'inline';
-        adminLink.style.display = 'none';
+        userInfo.textContent = "زائر";
+        btnSignOut.style.display = "none";
+        btnSignIn.style.display = "inline";
+        btnSignUp.style.display = "inline";
+        adminLink.style.display = "none";
       }
+    });
+
+    // تحميل المنتجات
+    const productsDiv = document.getElementById("products");
+
+    db.collection("products").orderBy("createdAt","desc").onSnapshot(snapshot=>{
+      productsDiv.innerHTML = "";
+      snapshot.forEach(doc=>{
+        const p = doc.data();
+        productsDiv.innerHTML += `
+          <div>
+            <h3>${p.name}</h3>
+            <img src="${p.imageURL}" width="120">
+            <p>${p.description || ""}</p>
+            <p>السعر: ${p.price} جنيه</p>
+          </div>
+        `;
+      });
     });
   </script>
 </body>

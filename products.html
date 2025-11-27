@@ -16,7 +16,6 @@
         background:#fafafa;
     }
 
-    /* الهيدر */
     header{
         background:white;
         padding:20px;
@@ -30,7 +29,6 @@
         box-shadow:0 2px 10px #00000010;
     }
 
-    /* قائمة المنتجات */
     #products{
         display:grid;
         grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
@@ -40,7 +38,6 @@
         margin:auto;
     }
 
-    /* بطاقة المنتج */
     .card{
         background:white;
         padding:15px;
@@ -145,6 +142,8 @@
 
 <script>
 
+const ADMIN_EMAIL = "clever2251999@gmail.com";
+
 auth.onAuthStateChanged(user=>{
     loadProducts();
 });
@@ -165,6 +164,20 @@ function addToCart(item){
     alert("✔ تم إضافة المنتج إلى السلة");
 }
 
+function deleteProduct(id){
+    if(confirm("هل تريد حذف هذا المنتج نهائياً؟")){
+        db.collection("products").doc(id).delete()
+        .then(()=>{
+            alert("✔ تم حذف المنتج بنجاح");
+            loadProducts();
+        })
+        .catch(err=>{
+            alert("⚠ حدث خطأ أثناء الحذف");
+            console.log(err);
+        });
+    }
+}
+
 function loadProducts(){
     const container = document.getElementById("products");
     container.innerHTML = "<p style='text-align:center;width:100%'>جاري تحميل المنتجات...</p>";
@@ -183,12 +196,24 @@ function loadProducts(){
                         <h3>${p.name}</h3>
                         <p>${p.description}</p>
                         <div class="price">${p.price} جنيه</div>
-                        <button class="btn" onclick='addToCart(${JSON.stringify({
-                            id: doc.id,
-                            name: p.name,
-                            price: p.price,
-                            imageURL: p.imageURL
-                        })})'>🛒 إضافة إلى السلة</button>
+
+                        <button class="btn"
+                            onclick='addToCart(${JSON.stringify({
+                                id: doc.id,
+                                name: p.name,
+                                price: p.price,
+                                imageURL: p.imageURL
+                            })})'>
+                            🛒 إضافة إلى السلة
+                        </button>
+
+                        ${auth.currentUser && auth.currentUser.email === ADMIN_EMAIL ? `
+                            <button class="btn" 
+                                style="background:#d9534f;margin-top:10px"
+                                onclick="deleteProduct('${doc.id}')">
+                                🗑 حذف المنتج
+                            </button>
+                        ` : ""}
                     </div>
                 `;
             });

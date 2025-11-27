@@ -1,1 +1,1 @@
-const x=1;
+// Firebase config placeholder

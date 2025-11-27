@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8">
+  <title>هواتف مستعملة</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body{ font-family:"Cairo"; direction:rtl; margin:0; background:#f3f4f6; }
+
+    header{
+        background:white;
+        padding:20px;
+        font-size:26px;
+        font-weight:700;
+        text-align:center;
+        box-shadow:0 2px 10px #00000010;
+        position:sticky;
+        top:0;
+        z-index:10;
+    }
+
+    #adminPanel{
+        text-align:center;
+        padding:20px;
+        display:none;
+    }
+
+    #adminPanel button{
+        padding:12px 20px;
+        border:none;
+        background:#0d6efd;
+        color:white;
+        border-radius:14px;
+        cursor:pointer;
+        font-size:17px;
+    }
+
+    #products{
+        display:grid;
+        grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
+        gap:25px;
+        padding:30px;
+        max-width:1300px;
+        margin:auto;
+    }
+
+    .card{
+        background:white;
+        padding:18px;
+        border-radius:18px;
+        box-shadow:0 4px 20px #00000012;
+        text-align:center;
+    }
+
+    .card img{
+        width:100%;
+        height:220px;
+        object-fit:cover;
+        border-radius:14px;
+    }
+
+    .btn{
+        background:#111;
+        color:white;
+        padding:10px;
+        width:100%;
+        font-size:16px;
+        border:none;
+        border-radius:12px;
+        margin-top:10px;
+        cursor:pointer;
+    }
+  </style>
+</head>
+<body>
+
+<header>📱 تليفونات مستعملة</header>
+
+<div id="adminPanel">
+    <button onclick="location.href='add-used-product.html'">➕ إضافة هاتف مستعمل</button>
+</div>
+
+<div id="products"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="firebase.js"></script>
+
+<script>
+
+const ADMIN_EMAIL = "clever2251999@gmail.com";
+
+auth.onAuthStateChanged(user=>{
+    if(!user) return;
+
+    // إظهار زر إضافة منتج للأدمن فقط
+    if(!user.isAnonymous && user.email === ADMIN_EMAIL){
+        document.getElementById("adminPanel").style.display = "block";
+    }
+
+    loadUsed();
+});
+
+function loadUsed(){
+    let container = document.getElementById("products");
+    container.innerHTML = "جاري تحميل الهواتف...";
+
+    db.collection("products")
+      .where("type", "==", "used")
+      .get()
+      .then(snap=>{
+          container.innerHTML = "";
+          snap.forEach(doc=>{
+              let p = doc.data();
+
+              container.innerHTML += `
+                <div class="card">
+                    <img src="${p.imageURL}">
+                    <h3>${p.name}</h3>
+                    <p>${p.description}</p>
+                    <b>${p.price} جنيه</b>
+
+                    <button class="btn" onclick='addToCart(${JSON.stringify({id:doc.id, name:p.name, price:p.price, imageURL:p.imageURL})})'>
+                      🛒 إضافة إلى السلة
+                    </button>
+                </div>
+              `;
+          });
+      });
+}
+
+function addToCart(item){
+    let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    cart.push(item);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    alert("✔ تمت الإضافة للسلة");
+}
+
+</script>
+
+</body>
+</html>

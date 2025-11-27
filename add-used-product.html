@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>إضافة هاتف مستعمل</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{font-family:Cairo; direction:rtl; padding:20px;}
+input, textarea{
+  width:100%; padding:12px; margin-bottom:10px;
+  border-radius:10px; border:1px solid #ccc;
+}
+button{
+  padding:12px 20px; background:#0d6efd; color:white;
+  border:none; border-radius:12px; font-size:17px;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<h2>📱 إضافة هاتف مستعمل</h2>
+
+<input id="name" placeholder="اسم الهاتف">
+<textarea id="description" placeholder="الوصف"></textarea>
+<input id="price" type="number" placeholder="السعر">
+<input id="imageURL" placeholder="رابط الصورة">
+
+<button onclick="addProduct()">✔ إضافة الهاتف</button>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="firebase.js"></script>
+
+<script>
+
+function addProduct(){
+    let name = document.getElementById("name").value;
+    let desc = document.getElementById("description").value;
+    let price = document.getElementById("price").value;
+    let img = document.getElementById("imageURL").value;
+
+    db.collection("products").add({
+        name,
+        description: desc,
+        price,
+        imageURL: img,
+        type: "used",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(()=>{
+        alert("✔ تم إضافة الهاتف المستعمل");
+        location.href = "used-products.html";
+    });
+}
+
+</script>
+
+</body>
+</html>

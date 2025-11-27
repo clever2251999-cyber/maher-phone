@@ -120,6 +120,25 @@
 
 <header>📱 Maher Phone</header>
 
+<!-- قسم التليفونات المستعملة -->
+<div id="usedSection" style="text-align:center; padding:15px;">
+    <button onclick="location.href='used.html'" 
+        style="
+            background:white;
+            border:2px solid #111;
+            padding:12px 22px;
+            font-size:18px;
+            border-radius:16px;
+            cursor:pointer;
+            display:inline-flex;
+            align-items:center;
+            gap:10px;
+            box-shadow:0 4px 10px #00000010;
+        ">
+        📱 تليفونات مستعملة
+    </button>
+</div>
+
 <!-- لوحة تحكم الأدمن -->
 <div id="adminPanel">
     <button onclick="location.href='add-product.html'">➕ إضافة منتج جديد</button>
@@ -141,7 +160,6 @@ const ADMIN_EMAIL = "clever2251999@gmail.com";
 auth.onAuthStateChanged(user => {
     if (!user) return;
 
-    // ⭐ اظهار لوحة الادمن اذا هو الادمن
     if (!user.isAnonymous && user.email === ADMIN_EMAIL) {
         document.getElementById("adminPanel").style.display = "block";
     }
@@ -173,6 +191,7 @@ function loadProducts(user){
     container.innerHTML = "<p style='width:100%;text-align:center'>جاري تحميل المنتجات...</p>";
 
     db.collection("products")
+      .where("category", "==", "new")
       .orderBy("createdAt", "desc")
       .get()
       .then(snap=>{
@@ -182,7 +201,6 @@ function loadProducts(user){
               let p = doc.data();
               let delBtn = "";
 
-              // ⭐ زر الحذف يظهر فقط للأدمن
               if (user && !user.isAnonymous && user.email === ADMIN_EMAIL) {
                 delBtn = `<button class="btn del-btn" onclick="deleteProduct('${doc.id}')">🗑 حذف المنتج</button>`;
               }

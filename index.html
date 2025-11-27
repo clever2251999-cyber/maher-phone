@@ -17,6 +17,7 @@
     <input id="password" placeholder="Password" type="password">
     <button id="btnSignUp">سجل</button>
     <button id="btnSignIn">دخول</button>
+    <button id="btnGuest">دخول زائر</button>
     <button id="btnSignOut" style="display:none;">خروج</button>
     <span id="userInfo"></span>
   </div>
@@ -27,62 +28,59 @@
   <a href="profile.html">صفحتي</a>
   <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
 
-  <!-- Firebase SDK (compat) -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
   <script>
-    // إعدادات Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAAYSyJf1YPFU7bXB87hKuPSUzJ53G0tt4",
       authDomain: "maher-phone-18581.firebaseapp.com",
       projectId: "maher-phone-18581",
       storageBucket: "maher-phone-18581.appspot.com",
       messagingSenderId: "452858222210",
-      appId: "1:452858222210:web:12fa439652c4aa0b48869b",
-      measurementId: "G-STSKLY357L"
+      appId: "1:452858222210:web:12fa439652c4aa0b48869b"
     };
 
     firebase.initializeApp(firebaseConfig);
-
     const auth = firebase.auth();
     const db = firebase.firestore();
-    const storage = firebase.storage();
 
     const emailEl = document.getElementById('email');
     const passEl = document.getElementById('password');
+
     const btnSignUp = document.getElementById('btnSignUp');
     const btnSignIn = document.getElementById('btnSignIn');
+    const btnGuest  = document.getElementById('btnGuest');
     const btnSignOut = document.getElementById('btnSignOut');
     const userInfo = document.getElementById('userInfo');
     const adminLink = document.getElementById('adminLink');
 
     const ADMIN_EMAIL = "clever2251999@gmail.com";
 
-    // تسجيل جديد (إصلاح مشكلة email invalid)
+    // تسجيل جديد
     btnSignUp.onclick = async () => {
       const email = emailEl.value.trim();
-      const pass  = passEl.value.trim();
+      const pass = passEl.value.trim();
 
-      if (!email || !pass) return alert("ادخل بريد إلكتروني وكلمة مرور");
-      if (!email.includes("@") || !email.includes(".")) return alert("صيغة البريد الإلكتروني غير صحيحة");
+      if (!email || !pass) return alert("ادخل البريد والرقم السري");
+      if (!email.includes("@") || !email.includes(".")) return alert("صيغة البريد غير صحيحة");
 
       try {
         await auth.createUserWithEmailAndPassword(email, pass);
-        alert("تم التسجيل بنجاح ✓");
+        alert("تم التسجيل بنجاح");
       } catch (e) {
         alert(e.message);
       }
     };
 
-    // تسجيل دخول (إصلاح email invalid)
+    // تسجيل دخول
     btnSignIn.onclick = async () => {
       const email = emailEl.value.trim();
-      const pass  = passEl.value.trim();
+      const pass = passEl.value.trim();
 
-      if (!email || !pass) return alert("ادخل بريد إلكتروني وكلمة مرور");
+      if (!email || !pass) return alert("ادخل البريد والرقم السري");
 
       try {
         await auth.signInWithEmailAndPassword(email, pass);
@@ -91,22 +89,35 @@
       }
     };
 
+    // دخول زائر
+    btnGuest.onclick = async () => {
+      try {
+        await auth.signInAnonymously();
+      } catch (e) {
+        alert(e.message);
+      }
+    };
+
     // خروج
     btnSignOut.onclick = () => auth.signOut();
 
-    // متابعة حالة تسجيل الدخول
-    auth.onAuthStateChanged(async user => {
+    // متابعة حالة المستخدم
+    auth.onAuthStateChanged(user => {
       if (user) {
-        userInfo.textContent = user.email;
+        userInfo.textContent = user.email ? user.email : "زائر";
+
         btnSignOut.style.display = 'inline';
         btnSignIn.style.display = 'none';
         btnSignUp.style.display = 'none';
 
-        if (user.email === ADMIN_EMAIL)
+        if (!user.email) {
+          adminLink.style.display = 'none';
+        } else if (user.email === ADMIN_EMAIL) {
           adminLink.style.display = 'inline';
+        }
 
       } else {
-        userInfo.textContent = 'زائر';
+        userInfo.textContent = "زائر";
         btnSignOut.style.display = 'none';
         btnSignIn.style.display = 'inline';
         btnSignUp.style.display = 'inline';
@@ -114,7 +125,7 @@
       }
     });
 
-    // عرض المنتجات
+    // تحميل المنتجات
     const productsDiv = document.getElementById('products');
 
     db.collection("products").orderBy("createdAt", "desc").onSnapshot(snapshot => {
@@ -127,34 +138,11 @@
             <img src="${p.imageURL}" width="120">
             <p>${p.description || ""}</p>
             <p>السعر: ${p.price} جنيه</p>
-            <button onclick="addToCart('${doc.id}', '${p.name}', ${p.price})">أضف للسلة</button>
           </div>
         `;
       });
     });
 
-    // إضافة للسلة
-    window.addToCart = async (productId, name, price) => {
-      const user = auth.currentUser;
-      if (!user) return alert("قم بتسجيل الدخول أولاً");
-
-      const cartRef = db.collection("users").doc(user.uid).collection("cart");
-      const existing = await cartRef.where("productId", "==", productId).limit(1).get();
-
-      if (!existing.empty) {
-        await existing.docs[0].ref.update({
-          qty: firebase.firestore.FieldValue.increment(1)
-        });
-      } else {
-        await cartRef.add({
-          productId, name, price,
-          qty: 1,
-          addedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      }
-
-      alert("تمت إضافة المنتج للسلة ✓");
-    };
   </script>
 </body>
 </html>

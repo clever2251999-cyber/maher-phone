@@ -1,60 +1,117 @@
-<!doctype html>
-<html lang="ar">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8">
-  <title>Maher Phone - Login</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {font-family: Arial; padding: 20px; text-align: center;}
-    input {padding: 10px; margin: 5px; width: 80%; max-width: 300px;}
-    button {padding: 10px 20px; margin: 5px;}
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Maher Phone - تسجيل الدخول</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #0d6efd, #6610f2);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            background: #ffffffee;
+            width: 380px;
+            padding: 30px;
+            border-radius: 18px;
+            box-shadow: 0 10px 25px #00000040;
+            text-align: center;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0d6efd;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 15px;
+            color: #555;
+            margin-bottom: 25px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 15px;
+        }
+
+        input:focus {
+            border-color: #0d6efd;
+            outline: none;
+            box-shadow: 0 0 5px #0d6efd50;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background: #0d6efd;
+            color: #fff;
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background: #0046c7;
+        }
+
+        .alt-btn {
+            background: #6c757d;
+        }
+
+        .alt-btn:hover {
+            background: #565e64;
+        }
+
+    </style>
 </head>
 <body>
 
-<h2>Maher Phone</h2>
-<h3>تسجيل الدخول</h3>
+    <div class="login-container">
+        <div class="logo">📱 MAHER PHONE</div>
+        <div class="subtitle">تسجيل الدخول إلى لوحة التحكم</div>
 
-<input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Password">
+        <input type="email" id="email" placeholder="البريد الإلكتروني">
+        <input type="password" id="password" placeholder="كلمة المرور">
 
-<br>
-
-<button id="loginBtn">دخول</button>
-<button id="guestBtn">دخول كزائر</button>
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="firebase.js"></script>
+        <button onclick="login()">تسجيل دخول</button>
+        <button class="alt-btn" onclick="goToLoginUser()">دخول كزائر</button>
+    </div>
 
 <script>
-document.getElementById("guestBtn").onclick = async () => {
-    try {
-        await auth.signInAnonymously();
-        location.href = "products.html";
-    } catch (e) {
-        alert(e.message);
-    }
-};
+function login() {
+    // ضع هنا كود تسجيل الدخول الخاص بك
+    alert("تنفيذ تسجيل الدخول...");
+}
 
-document.getElementById("loginBtn").onclick = async () => {
-    const email = document.getElementById("email").value;
-    const pass  = document.getElementById("pass").value;
-
-    try {
-        await auth.signInWithEmailAndPassword(email, pass);
-
-        if (email === "clever2251999@gmail.com") {
-            location.href = "admin.html";
-        } else {
-            location.href = "products.html";
-        }
-
-    } catch (e) {
-        alert(e.message);
-    }
-};
+function goToLoginUser() {
+    // كود دخول الزائر
+    alert("دخول كزائر...");
+}
 </script>
 
 </body>

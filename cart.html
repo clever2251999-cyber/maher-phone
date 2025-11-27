@@ -25,8 +25,14 @@ button{background:#2196f3;color:white;border:none;cursor:pointer;}
 
 <button onclick="sendOrder()">إرسال الطلب</button>
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase.js"></script>
+
 <script>
 
+// تحميل السلة
 function loadCart(){
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
     const box = document.getElementById("cart-items");
@@ -57,36 +63,37 @@ function deleteItem(i){
 
 loadCart();
 
-function sendOrder(){
+
+// إرسال الطلب إلى Firestore
+async function sendOrder(){
     const name = document.getElementById("name").value.trim();
     const phone = document.getElementById("phone").value.trim();
     const address = document.getElementById("address").value.trim();
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-    if(!name || !phone || !address || cart.length===0){
+    if(!name || !phone || !address || cart.length === 0){
         alert("املأ البيانات كاملة");
         return;
     }
 
-    // Read all orders
-    let orders = JSON.parse(localStorage.getItem("orders") || "[]");
-    
-    // Save new order
-    orders.push({
-        name,
-        phone,
-        address,
-        cart,
-        time: new Date().toLocaleString()
-    });
+    try {
+        await db.collection("orders").add({
+            name,
+            phone,
+            address,
+            cart,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
 
-    localStorage.setItem("orders", JSON.stringify(orders));
+        localStorage.removeItem("cart");
 
-    // Clear the user's cart
-    localStorage.removeItem("cart");
+        alert("تم إرسال الطلب بنجاح");
+        location.href = "products.html";
 
-    alert("تم إرسال الطلب بنجاح");
-    location.href="products.html";
+    } catch (err) {
+        alert("حدث خطأ أثناء إرسال الطلب");
+        console.log(err);
+    }
 }
 
 </script>

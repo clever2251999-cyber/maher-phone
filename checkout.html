@@ -1,25 +1,42 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head><meta charset="utf-8"><title>اكمال الطلب</title></head>
+<body style="font-family:Arial;padding:16px;">
+  <h2>اكمال الطلب</h2>
+  <input id="custName" placeholder="الاسم الكامل"><br><br>
+  <input id="custPhone" placeholder="رقم الهاتف"><br><br>
+  <textarea id="custAddress" placeholder="العنوان الكامل"></textarea><br><br>
+  <button id="placeOrderBtn">ارسل الطلب</button>
+  <a href="cart.html">العودة للسلة</a>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="firebase.js"></script>
 
 <script>
-async function submitOrder(){
-    let name = document.getElementById("name").value;
-    let phone = document.getElementById("phone").value;
-    let address = document.getElementById("address").value;
+auth.onAuthStateChanged(user=>{ if(!user) return window.location.href='index.html'; });
 
-    let uid = auth.currentUser.uid;
+document.getElementById('placeOrderBtn').onclick = async () => {
+  const name = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  const address = document.getElementById('custAddress').value.trim();
+  if(!name || !phone || !address) return alert('اكمل البيانات');
 
-    await db.collection("orders").add({
-        userId: uid,
-        name,
-        phone,
-        address,
-        createdAt: Date.now()
-    });
+  const uid = auth.currentUser.uid;
+  const cartSnap = await db.collection('users').doc(uid).collection('cart').get();
+  const items = [];
+  for(const d of cartSnap.docs) items.push(d.data());
 
-    alert("تم إرسال الطلب");
-    location.href = "products.html";
-}
+  await db.collection('orders').add({
+    userId: uid, name, phone, address, items,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  for(const d of cartSnap.docs) await d.ref.delete();
+  alert('تم إرسال الطلب — شكراً!');
+  window.location.href = 'products.html';
+};
 </script>
+</body>
+</html>

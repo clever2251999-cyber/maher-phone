@@ -1,1 +1,56 @@
-<h1>Admin Panel</h1>
+<!doctype html>
+<html lang="ar">
+<head><meta charset="utf-8"><title>Admin - Add Product</title></head>
+<body style="font-family: Arial; padding:16px;">
+  <h1>لوحة الأدمن - أضف منتج</h1>
+  <div id="authStatus" style="margin-bottom:15px;color:red;font-weight:bold;"></div>
+
+  <form id="productForm" style="display:none">
+    <input id="pname" placeholder="اسم المنتج" required><br><br>
+    <textarea id="pdesc" placeholder="الوصف"></textarea><br><br>
+    <input id="pprice" placeholder="السعر" type="number" required><br><br>
+    <input id="pimage" type="file" accept="image/*" required><br><br>
+    <button type="submit">أضف المنتج</button>
+  </form>
+  <a href="products.html">عرض المنتجات</a>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="firebase.js"></script>
+
+<script>
+const ADMIN = "clever2251999@gmail.com";
+const authStatus = document.getElementById('authStatus');
+const productForm = document.getElementById('productForm');
+
+auth.onAuthStateChanged(user=>{
+  if(!user){ authStatus.textContent = "سجل دخول أولاً من الصفحة الرئيسية."; return; }
+  if(!user.email || user.email !== ADMIN){ authStatus.textContent = "ليس لديك صلاحية."; return; }
+  authStatus.style.color = 'green';
+  authStatus.textContent = 'أدمن: ' + user.email;
+  productForm.style.display = 'block';
+});
+
+productForm.onsubmit = async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('pname').value.trim();
+  const desc = document.getElementById('pdesc').value.trim();
+  const price = parseFloat(document.getElementById('pprice').value);
+  const file = document.getElementById('pimage').files[0];
+  if(!file) return alert('اختر صورة');
+  try{
+    const storageRef = storage.ref().child('product_images/' + Date.now() + '_' + file.name);
+    const snap = await storageRef.put(file);
+    const url = await snap.ref.getDownloadURL();
+    await db.collection('products').add({
+      name, description: desc, price, imageURL: url, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    alert('تمت إضافة المنتج');
+    productForm.reset();
+  } catch(e){ alert(e.message); }
+};
+</script>
+</body>
+</html>

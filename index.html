@@ -1,1 +1,93 @@
-<h1>Maher Phone - Login Page</h1>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <title>Maher Phone - تسجيل دخول</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body{font-family: Arial, sans-serif; padding: 16px; direction: rtl;}
+    input{padding:8px;margin:6px 0;display:block;width:100%;max-width:360px;}
+    button{padding:8px 12px;margin:6px 4px;}
+  </style>
+</head>
+<body>
+  <h1>Maher Phone</h1>
+  <div id="auth">
+    <input id="email" placeholder="Email" type="email">
+    <input id="password" placeholder="Password" type="password">
+    <button id="btnSignUp">سجل</button>
+    <button id="btnSignIn">دخول</button>
+    <button id="btnGuest">دخول زائر</button>
+    <button id="btnSignOut" style="display:none;">خروج</button>
+    <div id="userInfo" style="margin-top:8px;"></div>
+  </div>
+
+  <hr>
+  <a href="products.html">عرض المنتجات</a> |
+  <a href="cart.html">السلة</a> |
+  <a href="profile.html">صفحتي</a> |
+  <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+  <script src="firebase.js"></script>
+
+  <script>
+    const emailEl = document.getElementById('email');
+    const passEl = document.getElementById('password');
+    const btnSignUp = document.getElementById('btnSignUp');
+    const btnSignIn = document.getElementById('btnSignIn');
+    const btnGuest = document.getElementById('btnGuest');
+    const btnSignOut = document.getElementById('btnSignOut');
+    const userInfo = document.getElementById('userInfo');
+    const adminLink = document.getElementById('adminLink');
+
+    const ADMIN_EMAIL = "clever2251999@gmail.com";
+
+    btnSignUp.onclick = async () => {
+      const email = emailEl.value.trim();
+      const pass = passEl.value.trim();
+      if (!email || !pass) return alert("ادخل البريد وكلمة المرور");
+      if (!email.includes("@")) return alert("صيغة البريد غير صحيحة");
+      try { await auth.createUserWithEmailAndPassword(email, pass); alert("تم التسجيل بنجاح"); }
+      catch(e){ alert(e.message); }
+    };
+
+    btnSignIn.onclick = async () => {
+      const email = emailEl.value.trim();
+      const pass = passEl.value.trim();
+      if (!email || !pass) return alert("ادخل البريد وكلمة المرور");
+      try { await auth.signInWithEmailAndPassword(email, pass); }
+      catch(e){ alert(e.message); }
+    };
+
+    btnGuest.onclick = async () => {
+      try { await auth.signInAnonymously(); }
+      catch(e){ alert(e.message); }
+    };
+
+    btnSignOut.onclick = () => auth.signOut();
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        userInfo.textContent = user.email ? user.email : "زائر";
+        btnSignOut.style.display = 'inline';
+        btnSignIn.style.display = 'none';
+        btnSignUp.style.display = 'none';
+        if (user.email === ADMIN_EMAIL) adminLink.style.display = 'inline';
+        else adminLink.style.display = 'none';
+      } else {
+        userInfo.textContent = 'غير مسجل';
+        btnSignOut.style.display = 'none';
+        btnSignIn.style.display = 'inline';
+        btnSignUp.style.display = 'inline';
+        adminLink.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>

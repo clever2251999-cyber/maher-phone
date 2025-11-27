@@ -1,1 +1,71 @@
-<h1>Products</h1>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <title>جميع المنتجات - ماهر فون</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <style>.product-img { height: 230px; object-fit: contain; }</style>
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-dark bg-dark p-3">
+  <div class="container d-flex justify-content-between">
+    <a class="navbar-brand" href="index.html">📱 ماهر فون</a>
+    <div>
+      <a class="btn btn-light me-2" href="cart.html">🛒 السلة</a>
+      <a class="btn btn-outline-light" href="index.html">العودة</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <h2 class="mb-3">جميع المنتجات</h2>
+  <div id="allProducts" class="row g-3"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase.js"></script>
+
+<script>
+auth.onAuthStateChanged(user => {
+  if (!user) return window.location.href = 'index.html';
+  loadProducts();
+});
+
+function loadProducts(){
+  const container = document.getElementById('allProducts');
+  container.innerHTML = '';
+  db.collection('products').orderBy('createdAt','desc').onSnapshot(snapshot=>{
+    container.innerHTML = '';
+    if(snapshot.empty){ container.innerHTML = '<div class="alert alert-info">لا توجد منتجات بعد. الأدمن يمكنه الإضافة.</div>'; return; }
+    snapshot.forEach(doc=>{
+      const p = doc.data();
+      container.innerHTML += `
+        <div class="col-md-3">
+          <div class="card p-2 shadow-sm">
+            <img src="${p.imageURL}" class="product-img mb-2" alt="${p.name}">
+            <h5>${p.name}</h5>
+            <p class="text-danger fw-bold">${p.price.toLocaleString()} جنيه</p>
+            <button class="btn btn-dark" onclick="addToCart('${doc.id}')">إضافة للسلة</button>
+          </div>
+        </div>
+      `;
+    });
+  });
+}
+
+async function addToCart(productId){
+  const user = auth.currentUser;
+  if(!user) return alert("سجل الدخول أولاً");
+  const uid = user.uid;
+  const cartRef = db.collection('users').doc(uid).collection('cart');
+  const q = await cartRef.where('productId','==',productId).limit(1).get();
+  if(!q.empty) await q.docs[0].ref.update({ qty: firebase.firestore.FieldValue.increment(1) });
+  else await cartRef.add({ productId, qty: 1, addedAt: firebase.firestore.FieldValue.serverTimestamp() });
+  alert("تمت إضافة المنتج للسلة");
+}
+</script>
+</body>
+</html>

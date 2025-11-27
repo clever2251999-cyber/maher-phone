@@ -1,1 +1,59 @@
-<h1>Your Profile</h1>
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>صفحتي</title></head>
+<body style="font-family: Arial; padding:16px;">
+  <h1>صفحتي الشخصية</h1>
+  <div id="authInfo"></div>
+
+  <h3>تعبئة بيانات الحساب</h3>
+  <input id="name" placeholder="الاسم"><br>
+  <input id="phone" placeholder="الهاتف"><br>
+  <input id="address" placeholder="العنوان"><br>
+  <button id="saveProfile">احفظ البيانات</button>
+
+  <h3>سلة المشتريات</h3>
+  <div id="cart"></div>
+  <a href="products.html">العودة للمنتجات</a>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase.js"></script>
+
+<script>
+const authInfo = document.getElementById('authInfo');
+const nameEl = document.getElementById('name');
+const phoneEl = document.getElementById('phone');
+const addressEl = document.getElementById('address');
+const saveBtn = document.getElementById('saveProfile');
+const cartDiv = document.getElementById('cart');
+
+auth.onAuthStateChanged(async user => {
+  if(!user){ authInfo.textContent = 'سجّل الدخول أولاً'; return; }
+  authInfo.textContent = 'مرحبًا: ' + (user.email || 'زائر');
+  const userRef = db.collection('users').doc(user.uid);
+  const userDoc = await userRef.get();
+  if(userDoc.exists){
+    const d = userDoc.data();
+    nameEl.value = d.name || '';
+    phoneEl.value = d.phone || '';
+    addressEl.value = d.address || '';
+  }
+  db.collection('users').doc(user.uid).collection('cart').onSnapshot(snap=>{
+    cartDiv.innerHTML = '';
+    snap.forEach(doc=>{
+      const it = doc.data();
+      cartDiv.innerHTML += `<div>${it.productId} - qty:${it.qty || 1}</div>`;
+    });
+  });
+  saveBtn.onclick = async () => {
+    await userRef.set({
+      name: nameEl.value, phone: phoneEl.value, address: addressEl.value,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    alert('تم الحفظ');
+  };
+});
+</script>
+</body>
+</html>

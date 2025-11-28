@@ -12,11 +12,10 @@
         font-family:"Cairo", sans-serif;
         direction:rtl;
         margin:0;
-        background:#0a0a0a; /* خلفية داكنة */
+        background:#0a0a0a;
         color:#e8e8e8;
     }
 
-    /* ====== الهيدر ====== */
     header{
         background:#0f0f0f;
         padding:20px;
@@ -31,7 +30,6 @@
         border-bottom:1px solid #00aaff33;
     }
 
-    /* ====== شريط الفئات ====== */
     #categories{
         display:flex;
         overflow-x:auto;
@@ -72,7 +70,6 @@
         border:1px solid #00aaff55;
     }
 
-    /* ====== لوحة الأدمن ====== */
     #adminPanel{
         padding:20px;
         text-align:center;
@@ -96,7 +93,6 @@
         box-shadow:0 0 12px #00aaff88;
     }
 
-    /* ====== شبكة المنتجات ====== */
     #products{
         display:grid;
         grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
@@ -106,7 +102,6 @@
         margin:auto;
     }
 
-    /* ====== كارت المنتج ====== */
     .card{
         background:#111;
         padding:18px;
@@ -149,7 +144,6 @@
         text-shadow:0 0 8px #00aaff55;
     }
 
-    /* ====== زرار الاضافة للسلة ====== */
     .btn{
         background:#0d0d0d;
         color:#fff;
@@ -184,7 +178,6 @@
         box-shadow:0 0 15px #ff000066;
     }
 
-    /* ====== زر السلة ====== */
     #cart-btn{
         position:fixed;
         bottom:20px;
@@ -223,18 +216,86 @@
         background:#ff0000;
         box-shadow:0 0 15px #ff000088;
     }
+
+
+    /*=====================================*/
+    /*        📱 تحسين الموبايل           */
+    /*=====================================*/
+    @media (max-width: 600px) {
+
+        header{
+            font-size:22px;
+            padding:14px;
+        }
+
+        #categories{
+            padding:10px;
+            gap:8px;
+            top:60px;
+        }
+
+        #categories button{
+            padding:8px 14px;
+            font-size:14px;
+        }
+
+        #products{
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            padding:15px;
+            gap:18px;
+        }
+
+        .card{
+            padding:14px;
+            border-radius:16px;
+        }
+
+        .card img{
+            height:180px;
+        }
+
+        h3{
+            font-size:17px;
+        }
+
+        p{
+            font-size:14px;
+        }
+
+        .price{
+            font-size:18px;
+        }
+
+        .btn{
+            font-size:15px;
+            padding:10px;
+        }
+
+        #cart-btn{
+            padding:12px 18px;
+            font-size:15px;
+            bottom:15px;
+            right:15px;
+        }
+
+        #logout{
+            padding:10px 16px;
+            font-size:14px;
+            bottom:15px;
+            left:15px;
+        }
+    }
+
   </style>
 </head>
 <body>
 
 <header>📱 Maher Phone</header>
 
-<!-- ⭐⭐⭐ شريط أرقام التواصل ⭐⭐⭐ -->
 <div style="
     background:#0f0f0f;
     padding:6px 0;
     text-align:center;
-    font-family:'Cairo', sans-serif;
     font-size:18px;
     color:#00aaff;
     border-bottom:1px solid #00aaff22;
@@ -243,28 +304,19 @@
     <span style="font-size:20px;">📞</span>
     <strong>للتواصل:</strong>
 
-    <span style="
-        font-weight:900;
-        font-size:20px;
-        margin:0 8px;
-        color:#e8e8e8;">
+    <span style="font-weight:900; font-size:20px; margin:0 8px; color:#e8e8e8;">
         01110112115
     </span>
 
     <span style="color:#00aaff;"> - </span>
 
-    <span style="
-        font-weight:900;
-        font-size:20px;
-        margin:0 8px;
-        color:#e8e8e8;">
+    <span style="font-weight:900; font-size:20px; margin:0 8px; color:#e8e8e8;">
         01157642100
     </span>
 </div>
 
 <div style="text-align:center; padding:15px;">
-    <button 
-        onclick="location.href='used-products.html'"
+    <button onclick="location.href='used-products.html'"
         style="
             background:#0d0d0d;
             border:1px solid #00aaff44;

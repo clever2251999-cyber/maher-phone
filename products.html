@@ -8,155 +8,201 @@
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
 
   <style>
-
-    /* 🟦 خلفية عامة */
     body{
         font-family:"Cairo", sans-serif;
         direction:rtl;
         margin:0;
-        background:#04070c;
-        color:white;
+        background:#0a0a0a; /* خلفية داكنة */
+        color:#e8e8e8;
     }
 
-    /* 🟦 الهيدر */
+    /* ====== الهيدر ====== */
     header{
-        color:#cfe8ff;
+        background:#0f0f0f;
+        padding:20px;
         text-align:center;
-        font-size:42px;
+        font-size:28px;
         font-weight:700;
-        padding:25px 0;
-        text-shadow:0 0 20px #46baff;
-        border-bottom:1px solid #0e2a47;
+        position:sticky;
+        top:0;
+        z-index:10;
+        color:#00aaff;
+        box-shadow:0 0 12px #00aaff55;
+        border-bottom:1px solid #00aaff33;
     }
 
-    /* 🔵 شريط الأرقام */
-    #phoneBar{
-        background:#040d1a;
-        border-bottom:1px solid #0e2a47;
-        padding:10px;
-        text-align:center;
-        font-size:20px;
-        color:#9cd3ff;
-        text-shadow:0 0 8px #1c5d8f;
-    }
-
-    /* 🔵 قسم الفئات */
+    /* ====== شريط الفئات ====== */
     #categories{
         display:flex;
-        justify-content:center;
-        gap:25px;
-        padding:15px 10px;
-        margin:20px auto;
-        border:2px solid #009dff;
-        border-radius:20px;
-        width:95%;
-        max-width:900px;
-        backdrop-filter:blur(6px);
-        background:#02101d77;
-        box-shadow:0 0 15px #008cff;
+        overflow-x:auto;
+        gap:12px;
+        padding:15px;
+        background:#0d0d0d;
+        position:sticky;
+        top:70px;
+        z-index:9;
+        box-shadow:0 0 10px #00aaff33 inset;
+        border-bottom:1px solid #00aaff22;
     }
 
     #categories button{
-        padding:10px 26px;
-        background:transparent;
-        border:2px solid #00aaff;
-        border-radius:30px;
-        color:#cbefff;
-        font-size:18px;
+        padding:10px 18px;
+        background:#111;
+        color:#d8d8d8;
+        border:none;
+        border-radius:50px;
         cursor:pointer;
-        transition:0.2s;
-        text-shadow:0 0 10px #008cff;
+        white-space:nowrap;
+        font-size:15px;
+        font-weight:600;
+        transition:0.25s;
+        border:1px solid #00aaff33;
     }
 
     #categories button:hover{
-        background:#0077ff55;
+        background:#0d0d0d;
+        color:#00aaff;
+        box-shadow:0 0 10px #00aaff55;
     }
 
     #categories button.active{
-        background:#0a84ff;
-        border-color:#0a84ff;
-        color:white;
-        box-shadow:0 0 15px #008cff;
+        background:#00aaff33;
+        color:#fff;
+        box-shadow:0 0 12px #00aaff88;
+        border:1px solid #00aaff55;
     }
 
-    /* المنتجات */
+    /* ====== لوحة الأدمن ====== */
+    #adminPanel{
+        padding:20px;
+        text-align:center;
+        display:none;
+    }
+
+    #adminPanel button{
+        padding:12px 20px;
+        font-size:17px;
+        border:none;
+        border-radius:14px;
+        background:#00aaff;
+        color:white;
+        cursor:pointer;
+        margin-bottom:10px;
+        transition:0.25s;
+    }
+
+    #adminPanel button:hover{
+        background:#0088cc;
+        box-shadow:0 0 12px #00aaff88;
+    }
+
+    /* ====== شبكة المنتجات ====== */
     #products{
         display:grid;
         grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
-        gap:30px;
-        padding:35px;
+        gap:25px;
+        padding:30px;
         max-width:1300px;
         margin:auto;
     }
 
-    /* كروت المنتجات */
+    /* ====== كارت المنتج ====== */
     .card{
-        background:#02101f;
-        padding:20px;
-        border-radius:22px;
-        border:2px solid #00aaff;
-        box-shadow:0 0 18px #008cffaa;
+        background:#111;
+        padding:18px;
+        border-radius:20px;
+        box-shadow:0 0 15px #00aaff11;
         text-align:center;
         transition:0.3s;
+        border:1px solid #00aaff22;
+    }
+
+    .card:hover{
+        transform:translateY(-4px);
+        box-shadow:0 0 18px #00aaff55;
+        border-color:#00aaff66;
     }
 
     .card img{
         width:100%;
-        height:260px;
-        object-fit:contain;
+        height:240px;
+        object-fit:cover;
         border-radius:16px;
-        background:#000;
+        box-shadow:0 0 10px #00aaff33;
     }
 
-    .card h3{
-        font-size:24px;
-        margin:15px 0 5px;
-        color:white;
+    h3{
+        margin:12px 0 6px;
+        color:#fff;
+    }
+
+    p{
+        color:#ccc;
+        font-size:15px;
     }
 
     .price{
-        font-size:22px;
+        margin-top:8px;
+        font-size:20px;
         font-weight:700;
-        margin-top:10px;
-        color:#7cd3ff;
+        color:#00aaff;
+        text-shadow:0 0 8px #00aaff55;
     }
 
+    /* ====== زرار الاضافة للسلة ====== */
     .btn{
-        background:#008cff;
-        color:white;
+        background:#0d0d0d;
+        color:#fff;
         padding:12px;
         border:none;
         border-radius:14px;
         cursor:pointer;
         width:100%;
-        font-size:18px;
-        font-weight:700;
+        font-size:17px;
+        font-weight:600;
         margin-top:12px;
-        box-shadow:0 0 12px #008cff;
-        transition:0.2s;
+        border:1px solid #00aaff44;
+        transition:0.25s;
     }
 
     .btn:hover{
-        background:#0a74d8;
+        background:#00aaff33;
+        color:#fff;
+        box-shadow:0 0 12px #00aaff88;
+        border-color:#00aaff88;
     }
 
     .del-btn{
-        background:#ff0033;
-        box-shadow:0 0 12px #ff1b47;
+        background:#b82222;
+        margin-top:10px;
+        border:none;
+        box-shadow:0 0 10px #ff222244;
     }
 
+    .del-btn:hover{
+        background:#ff0000;
+        box-shadow:0 0 15px #ff000066;
+    }
+
+    /* ====== زر السلة ====== */
     #cart-btn{
         position:fixed;
         bottom:20px;
         right:20px;
         padding:16px 22px;
-        background:#008cff;
+        background:#00aaff;
         color:white;
         border:none;
         border-radius:50px;
         font-size:17px;
         cursor:pointer;
-        box-shadow:0 0 20px #009dff;
+        box-shadow:0 0 18px #00aaff55;
+        transition:0.25s;
+    }
+
+    #cart-btn:hover{
+        background:#0088cc;
+        box-shadow:0 0 18px #00aaffaa;
     }
 
     #logout{
@@ -164,33 +210,85 @@
         bottom:20px;
         left:20px;
         padding:14px 20px;
-        background:#ff0033;
+        background:#b82222;
         color:white;
         border:none;
         border-radius:12px;
         font-size:16px;
         cursor:pointer;
-        box-shadow:0 0 20px #ff1b47;
+        box-shadow:0 0 12px #ff000055;
     }
 
+    #logout:hover{
+        background:#ff0000;
+        box-shadow:0 0 15px #ff000088;
+    }
   </style>
 </head>
 <body>
 
-<header>Maher Phone</header>
+<header>📱 Maher Phone</header>
 
-<div id="phoneBar">
-    📞 للتواصل — 01110112115 – 01157642100
+<!-- ⭐⭐⭐ شريط أرقام التواصل ⭐⭐⭐ -->
+<div style="
+    background:#0f0f0f;
+    padding:6px 0;
+    text-align:center;
+    font-family:'Cairo', sans-serif;
+    font-size:18px;
+    color:#00aaff;
+    border-bottom:1px solid #00aaff22;
+    box-shadow:0 0 10px #00aaff22 inset;
+">
+    <span style="font-size:20px;">📞</span>
+    <strong>للتواصل:</strong>
+
+    <span style="
+        font-weight:900;
+        font-size:20px;
+        margin:0 8px;
+        color:#e8e8e8;">
+        01110112115
+    </span>
+
+    <span style="color:#00aaff;"> - </span>
+
+    <span style="
+        font-weight:900;
+        font-size:20px;
+        margin:0 8px;
+        color:#e8e8e8;">
+        01157642100
+    </span>
+</div>
+
+<div style="text-align:center; padding:15px;">
+    <button 
+        onclick="location.href='used-products.html'"
+        style="
+            background:#0d0d0d;
+            border:1px solid #00aaff44;
+            padding:10px 18px;
+            font-size:17px;
+            border-radius:50px;
+            cursor:pointer;
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            box-shadow:0 0 12px #00aaff33;
+            color:#fff;">
+        📱 تليفونات مستعملة
+    </button>
 </div>
 
 <div id="categories">
-    <button class="active" onclick="filterCategory('all')">الكل</button>
-    <button onclick="filterCategory('chargers')">الشواحن</button>
-    <button onclick="filterCategory('cables')">الوصلات</button>
-    <button onclick="filterCategory('handsfree')">الهاندفري</button>
-    <button onclick="filterCategory('screens')">الاسكرينات</button>
-    <button onclick="filterCategory('airpods')">الايربودز</button>
-    <button onclick="filterCategory('speakers')">السماعات</button>
+    <button class="active" onclick="filterCategory('all')">🔍 الكل</button>
+    <button onclick="filterCategory('chargers')">🔌 الشواحن</button>
+    <button onclick="filterCategory('cables')">🔗 الوصلات</button>
+    <button onclick="filterCategory('handsfree')">🎧 الهاندفري</button>
+    <button onclick="filterCategory('screens')">📱 الاسكرينات</button>
+    <button onclick="filterCategory('airpods')">🎵 الايربودز</button>
+    <button onclick="filterCategory('speakers')">🔊 السماعات</button>
 </div>
 
 <div id="adminPanel">
@@ -199,7 +297,7 @@
 
 <div id="products"></div>
 
-<button id="cart-btn" onclick="goCart()">🛒</button>
+<button id="cart-btn" onclick="goCart()">🛒 السلة</button>
 <button id="logout" onclick="logout()">تسجيل خروج</button>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -208,7 +306,119 @@
 <script src="firebase.js"></script>
 
 <script>
-/* نفس السكريبت بدون أي تغيير */
+
+let allProducts = [];
+let currentUser = null;
+const ADMIN_EMAIL = "clever2251999@gmail.com";
+
+auth.onAuthStateChanged(user => {
+    currentUser = user;
+
+    if (user && !user.isAnonymous && user.email === ADMIN_EMAIL){
+        document.getElementById("adminPanel").style.display = "block";
+    }
+
+    loadProducts();
+});
+
+function logout(){
+    auth.signOut();
+    location.href="index.html";
+}
+
+function goCart(){
+    location.href="cart.html";
+}
+
+function addToCart(item){
+    let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    cart.push(item);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    alert("✔ تم إضافة المنتج إلى السلة");
+}
+
+function deleteProduct(id){
+    if (confirm("هل تريد حذف هذا المنتج؟")){
+        db.collection("products").doc(id).delete();
+        alert("✔ تم حذف المنتج");
+        loadProducts();
+    }
+}
+
+async function loadProducts(){
+
+    const container = document.getElementById("products");
+    container.innerHTML = "<p style='width:100%;text-align:center'>جاري تحميل المنتجات...</p>";
+
+    allProducts = [];
+
+    let snap = await db.collection("products").orderBy("createdAt", "desc").get();
+
+    snap.forEach(doc => {
+        allProducts.push({
+            ...doc.data(),
+            id: doc.id
+        });
+    });
+
+    renderProducts(allProducts);
+}
+
+function renderProducts(list){
+
+    const container = document.getElementById("products");
+    container.innerHTML = "";
+
+    if (list.length === 0){
+        container.innerHTML = "<p style='text-align:center;width:100%;color:#ccc'>لا توجد منتجات في هذا القسم</p>";
+        return;
+    }
+
+    list.forEach(p => {
+
+        let delBtn = "";
+        if (currentUser && !currentUser.isAnonymous && currentUser.email === ADMIN_EMAIL){
+            delBtn = `
+                <button class="btn del-btn" onclick="deleteProduct('${p.id}')">
+                    🗑 حذف المنتج
+                </button>`;
+        }
+
+        container.innerHTML += `
+            <div class="card">
+                <img src="${p.imageURL || p.image}">
+                <h3>${p.name}</h3>
+                <p>${p.description}</p>
+                <div class="price">${p.price} جنيه</div>
+
+                <button class="btn" onclick='addToCart(${JSON.stringify({
+                    id: p.id,
+                    name: p.name,
+                    price: p.price,
+                    image: p.imageURL || p.image
+                })})'>
+                    🛒 إضافة إلى السلة
+                </button>
+
+                ${delBtn}
+            </div>
+        `;
+    });
+}
+
+function filterCategory(cat){
+
+    document.querySelectorAll("#categories button")
+            .forEach(b => b.classList.remove("active"));
+    event.target.classList.add("active");
+
+    if (cat === "all"){
+        renderProducts(allProducts);
+    } else {
+        renderProducts(allProducts.filter(p => p.category === cat));
+    }
+}
+
 </script>
 
 </body>

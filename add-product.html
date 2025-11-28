@@ -70,11 +70,22 @@
     <button onclick="save()">💾 حفظ المنتج</button>
 </div>
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="firebase.js"></script>
 
 <script>
+
+// ✔ التحقق من تسجيل الدخول — بدونها Firestore يرفض الحفظ
+auth.onAuthStateChanged(user => {
+    if (!user) {
+        alert("⚠ يجب تسجيل الدخول أولاً");
+        location.href = "index.html";
+    }
+});
+
 function save(){
     let name = document.getElementById("name").value.trim();
     let description = document.getElementById("description").value.trim();
@@ -92,13 +103,17 @@ function save(){
         description,
         price,
         imageURL,
-        category,       // ✔ أهم خطوووووة
+        category,
         createdAt: new Date()
     }).then(()=>{
         alert("✔ تم حفظ المنتج بنجاح");
         location.href = "products.html";
+    }).catch(err=>{
+        alert("❌ خطأ أثناء الحفظ");
+        console.log(err);
     });
 }
+
 </script>
 
 </body>

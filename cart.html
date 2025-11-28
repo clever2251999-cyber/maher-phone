@@ -137,6 +137,7 @@ function loadCart() {
     let total = 0;
 
     cart.forEach((item, i) => {
+        if (!item) return;((item, i) => {
         if (!item.qty || item.qty < 1) { item.qty = 1; localStorage.setItem("cart", JSON.stringify(cart)); }
         const qty = item.qty;((item, i) => {
         const qty = item.qty || 1;
@@ -144,7 +145,7 @@ function loadCart() {
 
         html += `
         <div class="card">
-            <img src="${item.img}" style="width:100%;border-radius:10px;margin-bottom:10px;">
+            <img src="${item.img || 'https://via.placeholder.com/300x250?text=No+Image'}" style="width:100%;border-radius:10px;margin-bottom:10px;">
             <b style="color:#00eaff;">${item.name}</b><br>
             <span style="color:#00ffaa;">السعر: ${item.price} جنيه</span><br>
 

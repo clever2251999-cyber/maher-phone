@@ -157,7 +157,7 @@ function deleteItem(i){
 loadCart();
 
 
-// ⭐⭐⭐ دالة إرسال الطلب + فتح الواتساب ⭐⭐⭐
+// ⭐⭐⭐ دالة إرسال الطلب ⭐⭐⭐
 async function sendOrder(){
     const name = document.getElementById("name").value.trim();
     const phone = document.getElementById("phone").value.trim();
@@ -169,33 +169,26 @@ async function sendOrder(){
         return;
     }
 
-    // تجهيز تفاصيل المنتجات
     let itemsText = "";
     cart.forEach((item, i) => {
         itemsText += `• ${item.name} - ${item.price} جنيه\n`;
     });
 
-    // نص الرسالة للواتس
     const message =
-`🛒 *طلب جديد من المتجر*
+`🛒 *طلب جديد*
 ----------------------
 *👤 الاسم:* ${name}
 *📞 الهاتف:* ${phone}
 *📍 العنوان:* ${address}
 
 *📦 المنتجات:*
-${itemsText}
+${itemsText}`;
 
-✔️ شكراً لطلبك من متجر ماهر فون`;
-
-    // رقم الواتساب
-    const whatsappNumber = "201158078805"; // لازم يبدأ بـ 20
-
-    // رابط الواتساب
+    const whatsappNumber = "201158078805";
     const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
-    // فتح الواتساب
-    window.location.href = whatsappURL;
+    // فتح واتساب
+    window.open(whatsappURL, "_blank");
 
     // حفظ الطلب في Firebase
     try {
@@ -209,25 +202,12 @@ ${itemsText}
 
         localStorage.removeItem("cart");
 
-    } catch (err) {
-        console.error(err);
-        alert("❌ تم إرسال الطلب للواتساب لكن لم يتم حفظه في قاعدة البيانات");
-    }
-}
-
-        localStorage.removeItem("cart");
-
-        // فتح واتساب تلقائياً
-        const waNumber = "01158078805";
-        const url = `https://wa.me/2${waNumber}?text=${encodeURIComponent(msg)}`;
-        window.open(url, "_blank");
-
-        alert("✔ تم إرسال الطلب وسيتم فتح الواتساب الآن");
+        alert("✔ تم إرسال الطلب بنجاح");
         location.href = "products.html";
 
     } catch (err) {
         console.error(err);
-        alert("❌ حدث خطأ أثناء إرسال الطلب");
+        alert("❌ تم فتح الواتساب لكن لم يتم حفظ الطلب في قاعدة البيانات");
     }
 }
 

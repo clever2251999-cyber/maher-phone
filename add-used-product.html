@@ -84,18 +84,17 @@
         <label>المواصفات</label>
         <textarea id="details" placeholder="حالة ممتازة، بطارية 90%..."></textarea>
 
-        <label>صورة التليفون</label>
-        <input type="file" id="image" accept="image/*">
+        <label>رابط صورة التليفون (من GitHub)</label>
+        <input type="text" id="imageURL" placeholder="الصق رابط صورة مباشر">
 
         <button onclick="addUsedProduct()">إضافة المنتج</button>
 
         <p class="message" id="msg"></p>
     </div>
 
-    <!-- Firebase v9 compat -->
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
     <script src="firebase.js"></script>
 
     <script>
@@ -107,23 +106,18 @@
             const name = document.getElementById("name").value;
             const price = document.getElementById("price").value;
             const details = document.getElementById("details").value;
-            const imageFile = document.getElementById("image").files[0];
+            const imageURL = document.getElementById("imageURL").value;
 
-            if (!name || !price || !details || !imageFile) {
+            if (!name || !price || !details || !imageURL) {
                 msg.innerText = "⚠ جميع الحقول مطلوبة";
                 msg.style.color = "red";
                 return;
             }
 
-            msg.innerText = "⏳ جاري رفع الصورة...";
+            msg.innerText = "⏳ جاري حفظ المنتج...";
             msg.style.color = "black";
 
-            // رفع الصورة
-            const imageRef = storage.ref("usedProducts/" + Date.now() + "_" + imageFile.name);
-            await imageRef.put(imageFile);
-            const imageURL = await imageRef.getDownloadURL();
-
-            // حفظ البيانات
+            // حفظ البيانات داخل Firestore فقط
             await db.collection("usedProducts").add({
                 name,
                 price,
@@ -139,7 +133,7 @@
             document.getElementById("name").value = "";
             document.getElementById("price").value = "";
             document.getElementById("details").value = "";
-            document.getElementById("image").value = "";
+            document.getElementById("imageURL").value = "";
         }
     </script>
 

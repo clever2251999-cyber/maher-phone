@@ -162,7 +162,7 @@
     <button class="active" onclick="filterCategory('all')">🔍 الكل</button>
     <button onclick="filterCategory('chargers')">🔌 الشواحن</button>
     <button onclick="filterCategory('cables')">🔗 الوصلات</button>
-    <button onclick="filterCategory('handfree')">🎧 الهاندفري</button>
+    <button onclick="filterCategory('handsfree')">🎧 الهاندفري</button>
     <button onclick="filterCategory('screens')">📱 الاسكرينات</button>
     <button onclick="filterCategory('airpods')">🎵 الايربودز</button>
     <button onclick="filterCategory('speakers')">🔊 السماعات</button>
@@ -214,15 +214,15 @@ function addToCart(item){
     alert("✔ تم إضافة المنتج إلى السلة");
 }
 
-function deleteProduct(col, id){
+function deleteProduct(id){
     if (confirm("هل تريد حذف هذا المنتج؟")){
-        db.collection(col).doc(id).delete();
+        db.collection("products").doc(id).delete();
         alert("✔ تم حذف المنتج");
         loadProducts();
     }
 }
 
-/* 🔥 جمع منتجات كل المجموعات */
+/* ✔ تحميل المنتجات من Collection واحدة */
 async function loadProducts(){
 
     const container = document.getElementById("products");
@@ -230,28 +230,14 @@ async function loadProducts(){
 
     allProducts = [];
 
-    const collections = [
-        "chargers",
-        "cables",
-        "handfree",
-        "screens",
-        "airpods",
-        "speakers"
-    ];
+    let snap = await db.collection("products").orderBy("createdAt", "desc").get();
 
-    for (let col of collections){
-
-        let snap = await db.collection(col).orderBy("createdAt", "desc").get();
-
-        snap.forEach(doc => {
-            allProducts.push({
-                ...doc.data(),
-                id: doc.id,
-                col: col,
-                category: col
-            });
+    snap.forEach(doc => {
+        allProducts.push({
+            ...doc.data(),
+            id: doc.id
         });
-    }
+    });
 
     renderProducts(allProducts);
 }
@@ -271,23 +257,23 @@ function renderProducts(list){
         let delBtn = "";
         if (currentUser && !currentUser.isAnonymous && currentUser.email === ADMIN_EMAIL){
             delBtn = `
-                <button class="btn del-btn" onclick="deleteProduct('${p.col}', '${p.id}')">
+                <button class="btn del-btn" onclick="deleteProduct('${p.id}')">
                     🗑 حذف المنتج
                 </button>`;
         }
 
         container.innerHTML += `
             <div class="card">
-                <img src="${p.image}">
+                <img src="${p.imageURL || p.image}">
                 <h3>${p.name}</h3>
-                <p>${p.details || p.description}</p>
+                <p>${p.description}</p>
                 <div class="price">${p.price} جنيه</div>
 
                 <button class="btn" onclick='addToCart(${JSON.stringify({
                     id: p.id,
                     name: p.name,
                     price: p.price,
-                    image: p.image
+                    image: p.imageURL || p.image
                 })})'>
                     🛒 إضافة إلى السلة
                 </button>

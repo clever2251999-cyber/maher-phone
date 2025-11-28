@@ -38,12 +38,23 @@
         border:1px solid #00aaff55;
         box-shadow:0 0 12px #00aaff22;
         transition:0.25s;
+        display:flex;
+        gap:12px;
+        align-items:center;
     }
 
     .card:hover{
         transform:translateY(-3px);
         box-shadow:0 0 18px #00aaff88;
         border-color:#00aaff;
+    }
+
+    .card img{
+        width:90px;
+        height:90px;
+        object-fit:cover;
+        border-radius:10px;
+        border:1px solid #222;
     }
 
     .qty-box{
@@ -125,9 +136,29 @@
 
 <script>
 
+// normalize cart entries to ensure qty and price are numbers
+function normalizeCart(cart){
+    let changed = false;
+    cart = cart.map(item => {
+        // ensure fields exist
+        const normalized = {
+            id: item.id,
+            name: item.name || 'منتج',
+            price: Number(item.price) || 0,
+            qty: Number(item.qty) || 1,
+            img: item.img || ''
+        };
+        if(normalized.qty !== item.qty || normalized.price !== item.price) changed = true;
+        return normalized;
+    });
+    if(changed) localStorage.setItem('cart', JSON.stringify(cart));
+    return cart;
+}
+
 // تحميل السلة
 function loadCart(){
     let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    cart = normalizeCart(cart);
     const box = document.getElementById("cart-items");
 
     if(cart.length === 0){
@@ -140,22 +171,27 @@ function loadCart(){
     let total = 0;
 
     cart.forEach((item,i)=>{
-        let sub = item.price * item.qty;
+        const price = Number(item.price) || 0;
+        const qty = Number(item.qty) || 1;
+        let sub = price * qty;
         total += sub;
 
         html += `
         <div class="card">
-            <b style="color:#00eaff;">${item.name}</b><br>
-            <span style="color:#00ffaa;">السعر: ${item.price} جنيه</span><br>
-            <span>الكمية: ${item.qty}</span><br>
-            <span>الإجمالي: ${sub} جنيه</span>
+            ${item.img ? `<img src="${item.img}" alt="${item.name}">` : ''}
+            <div style="flex:1">
+                <b style="color:#00eaff;">${item.name}</b><br>
+                <span style="color:#00ffaa;">السعر: ${price} جنيه</span><br>
+                <span>الكمية: <span id="qty-${i}">${qty}</span></span><br>
+                <span>الإجمالي: <span id="sub-${i}">${sub}</span> جنيه</span>
 
-            <div class="qty-box">
-                <button class="qty-btn" onclick="changeQty(${i}, 1)">+</button>
-                <button class="qty-btn" onclick="changeQty(${i}, -1)">-</button>
+                <div class="qty-box">
+                    <button class="qty-btn" onclick="changeQty(${i}, 1)">+</button>
+                    <button class="qty-btn" onclick="changeQty(${i}, -1)">-</button>
+                </div>
+
+                <button class="delete-btn" onclick="deleteItem(${i})">🗑 حذف</button>
             </div>
-
-            <button class="delete-btn" onclick="deleteItem(${i})">🗑 حذف</button>
         </div>`;
     });
 
@@ -166,8 +202,13 @@ function loadCart(){
 // تغيير الكمية
 function changeQty(i, change){
     let cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    cart[i].qty += change;
+    // ensure cart normalized
+    cart = normalizeCart(cart);
 
+    // defensive: if index missing, ignore
+    if(!cart[i]) return;
+
+    cart[i].qty = (Number(cart[i].qty) || 1) + change;
     if(cart[i].qty < 1) cart[i].qty = 1;
 
     localStorage.setItem("cart", JSON.stringify(cart));
@@ -190,7 +231,8 @@ function sendOrder(){
     const name = document.getElementById("name").value.trim();
     const phone = document.getElementById("phone").value.trim();
     const address = document.getElementById("address").value.trim();
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    cart = normalizeCart(cart);
 
     if(!name || !phone || !address || cart.length === 0){
         alert("⚠️ املأ البيانات كاملة");
@@ -201,7 +243,7 @@ function sendOrder(){
     let total = 0;
 
     cart.forEach(item => {
-        let sub = item.price * item.qty;
+        let sub = (Number(item.price) || 0) * (Number(item.qty) || 1);
         total += sub;
         itemsText += `• ${item.name} - ${item.price} × ${item.qty} = ${sub} جنيه\n`;
     });
@@ -218,13 +260,14 @@ ${itemsText}
 ----------------------
 *💰 السعر الإجمالي:* ${total} جنيه`;
 
-    const whatsappNumber = "201110112115"; // رقمك كما طلبت
+    const whatsappNumber = "201158078805"; // رقمك كما طلبت
     const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
     window.open(whatsappURL, "_blank");
 
     alert("✔ تم إرسال الطلب بنجاح");
     localStorage.removeItem("cart");
+    loadCart();
 }
 
 </script>

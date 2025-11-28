@@ -125,7 +125,16 @@
 
 <script>
 function loadCart() {
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    let cart = [];
+    try {
+        cart = JSON.parse(localStorage.getItem("cart") || "[]");
+        if (!Array.isArray(cart)) cart = [];
+    } catch (e) {
+        console.error("Cart corrupted, resetting", e);
+        cart = [];
+        localStorage.setItem("cart", "[]");
+    }() {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");(localStorage.getItem("cart") || "[]");
     const box = document.getElementById("cart-items");
 
     if (cart.length === 0) {

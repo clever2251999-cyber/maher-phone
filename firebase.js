@@ -1,4 +1,5 @@
-// firebase.js - Firebase initialization (بدون Storage)
+// firebase.js - Firebase v9 compat
+
 const firebaseConfig = {
   apiKey: "AIzaSyAAYSyJf1YPFU7bXB87hKuPSUzJ53G0tt4",
   authDomain: "maher-phone-18581.firebaseapp.com",
@@ -10,8 +11,12 @@ const firebaseConfig = {
 };
 
 // تشغيل Firebase
-firebase.initializeApp(firebaseConfig);
+const app = firebase.initializeApp(firebaseConfig);
 
-// تفعيل الخدمات المستخدمة فقط
+// تفعيل الخدمات بأسلوب v9 compat
 const auth = firebase.auth();
 const db = firebase.firestore();
+
+// ❗ مهم جدًا: تعريفهم كـ Global
+window.auth = auth;
+window.db = db;

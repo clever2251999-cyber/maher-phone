@@ -28,7 +28,6 @@
         box-shadow:0 2px 10px #00000010;
     }
 
-    /* الأقسام */
     #categories{
         display:flex;
         overflow-x:auto;
@@ -150,32 +149,25 @@
 
 <header>📱 Maher Phone</header>
 
-<!-- زر التليفونات المستعملة -->
 <div style="text-align:center; padding:15px;">
     <button 
         onclick="location.href='used-products.html'"
-        style="
-            background:white;border:2px solid #111;padding:10px 18px;
-            font-size:17px;border-radius:50px;cursor:pointer;
-            display:inline-flex;align-items:center;gap:8px;
-            box-shadow:0 4px 12px #00000015;font-weight:600;
-        ">
+        style="background:white;border:2px solid #111;padding:10px 18px;font-size:17px;border-radius:50px;cursor:pointer;
+               display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 12px #00000015;font-weight:600;">
         📱 تليفونات مستعملة
     </button>
 </div>
 
-<!-- الأقسام -->
 <div id="categories">
     <button class="active" onclick="filterCategory('all')">🔍 الكل</button>
     <button onclick="filterCategory('chargers')">🔌 الشواحن</button>
     <button onclick="filterCategory('cables')">🔗 الوصلات</button>
-    <button onclick="filterCategory('handsfree')">🎧 الهاندفري</button>
+    <button onclick="filterCategory('handfree')">🎧 الهاندفري</button>
     <button onclick="filterCategory('screens')">📱 الاسكرينات</button>
     <button onclick="filterCategory('airpods')">🎵 الايربودز</button>
     <button onclick="filterCategory('speakers')">🔊 السماعات</button>
 </div>
 
-<!-- لوحة الأدمن -->
 <div id="adminPanel">
     <button onclick="location.href='add-product.html'">➕ إضافة منتج جديد</button>
 </div>
@@ -198,21 +190,22 @@ const ADMIN_EMAIL = "clever2251999@gmail.com";
 
 auth.onAuthStateChanged(user => {
     currentUser = user;
-    if (!user) return;
 
-    if (!user.isAnonymous && user.email === ADMIN_EMAIL) {
+    if (user && !user.isAnonymous && user.email === ADMIN_EMAIL){
         document.getElementById("adminPanel").style.display = "block";
     }
 
     loadProducts();
 });
 
-function logout(){ 
-    auth.signOut(); 
-    location.href="index.html"; 
+function logout(){
+    auth.signOut();
+    location.href="index.html";
 }
 
-function goCart(){ location.href = "cart.html"; }
+function goCart(){
+    location.href="cart.html";
+}
 
 function addToCart(item){
     let cart = JSON.parse(localStorage.getItem("cart") || "[]");
@@ -221,33 +214,50 @@ function addToCart(item){
     alert("✔ تم إضافة المنتج إلى السلة");
 }
 
-function deleteProduct(id){
-    if (confirm("هل تريد حذف هذا المنتج؟")) {
-        db.collection("products").doc(id).delete().then(() => {
-            alert("✔ تم الحذف");
-            location.reload();
-        });
+function deleteProduct(col, id){
+    if (confirm("هل تريد حذف هذا المنتج؟")){
+        db.collection(col).doc(id).delete();
+        alert("✔ تم حذف المنتج");
+        loadProducts();
     }
 }
 
-function loadProducts(){
+/* 🔥 جمع منتجات كل المجموعات */
+async function loadProducts(){
+
     const container = document.getElementById("products");
     container.innerHTML = "<p style='width:100%;text-align:center'>جاري تحميل المنتجات...</p>";
 
-    db.collection("products")
-      .orderBy("createdAt", "desc")
-      .get()
-      .then(snap=>{
-          allProducts = [];
-          snap.forEach(doc=>{
-              allProducts.push({ id: doc.id, ...doc.data() });
-          });
+    allProducts = [];
 
-          renderProducts(allProducts);
-      });
+    const collections = [
+        "chargers",
+        "cables",
+        "handfree",
+        "screens",
+        "airpods",
+        "speakers"
+    ];
+
+    for (let col of collections){
+
+        let snap = await db.collection(col).orderBy("createdAt", "desc").get();
+
+        snap.forEach(doc => {
+            allProducts.push({
+                ...doc.data(),
+                id: doc.id,
+                col: col,
+                category: col
+            });
+        });
+    }
+
+    renderProducts(allProducts);
 }
 
 function renderProducts(list){
+
     const container = document.getElementById("products");
     container.innerHTML = "";
 
@@ -256,21 +266,29 @@ function renderProducts(list){
         return;
     }
 
-    list.forEach(p=>{
-        let delBtn = "";
+    list.forEach(p => {
 
-        if (currentUser && !currentUser.isAnonymous && currentUser.email === ADMIN_EMAIL) {
-            delBtn = `<button class="btn del-btn" onclick="deleteProduct('${p.id}')">🗑 حذف المنتج</button>`;
+        let delBtn = "";
+        if (currentUser && !currentUser.isAnonymous && currentUser.email === ADMIN_EMAIL){
+            delBtn = `
+                <button class="btn del-btn" onclick="deleteProduct('${p.col}', '${p.id}')">
+                    🗑 حذف المنتج
+                </button>`;
         }
 
         container.innerHTML += `
             <div class="card">
-                <img src="${p.imageURL}">
+                <img src="${p.image}">
                 <h3>${p.name}</h3>
-                <p>${p.description}</p>
+                <p>${p.details || p.description}</p>
                 <div class="price">${p.price} جنيه</div>
 
-                <button class="btn" onclick='addToCart(${JSON.stringify({ id:p.id, name:p.name, price:p.price, imageURL:p.imageURL })})'>
+                <button class="btn" onclick='addToCart(${JSON.stringify({
+                    id: p.id,
+                    name: p.name,
+                    price: p.price,
+                    image: p.image
+                })})'>
                     🛒 إضافة إلى السلة
                 </button>
 
@@ -281,7 +299,9 @@ function renderProducts(list){
 }
 
 function filterCategory(cat){
-    document.querySelectorAll("#categories button").forEach(b=>b.classList.remove("active"));
+
+    document.querySelectorAll("#categories button")
+            .forEach(b => b.classList.remove("active"));
     event.target.classList.add("active");
 
     if (cat === "all"){

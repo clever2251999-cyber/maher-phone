@@ -11,12 +11,12 @@ const firebaseConfig = {
 };
 
 // تشغيل Firebase
-const app = firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
 
-// تفعيل الخدمات بأسلوب v9 compat
+// تفعيل الخدمات
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ❗ مهم جدًا: تعريفهم كـ Global
+// ❗ مهم: اجعلهم Global
 window.auth = auth;
 window.db = db;

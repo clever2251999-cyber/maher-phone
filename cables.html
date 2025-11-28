@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>قسم الوصلات</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .product-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .product-card {
+            background: white;
+            padding: 15px;
+            border-radius: 14px;
+            box-shadow: 0 4px 10px #00000015;
+            border: 1px solid #ddd;
+        }
+
+        .product-card img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .add-btn-container {
+            text-align: center;
+            margin: 20px;
+            display: none;
+        }
+
+        .add-btn {
+            background: white;
+            border: 2px solid #111;
+            padding: 12px 22px;
+            font-size: 18px;
+            border-radius: 16px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #111;
+            box-shadow: 0 4px 10px #00000010;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>🔌 قسم الوصلات</h2>
+
+    <div id="addProductBtn" class="add-btn-container">
+        <a class="add-btn" href="add-cable.html">➕ إضافة وصلة</a>
+    </div>
+
+    <div id="productsList" class="product-list"></div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+    <script src="firebase.js"></script>
+
+    <script>
+        async function loadProducts() {

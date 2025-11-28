@@ -92,9 +92,12 @@
         <p class="message" id="msg"></p>
     </div>
 
-    <!-- Firebase -->
+    <!-- Firebase v9 compat (مهم جدًا) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <!-- ملف Firebase الأصلي بتاع المتجر -->
     <script src="firebase.js"></script>
 
     <script>
@@ -117,23 +120,29 @@
             msg.innerText = "⏳ جاري حفظ المنتج...";
             msg.style.color = "black";
 
-            // حفظ البيانات داخل Firestore فقط
-            await db.collection("usedProducts").add({
-                name,
-                price,
-                details,
-                image: imageURL,
-                createdAt: new Date().toISOString()
-            });
+            try {
+                await db.collection("usedProducts").add({
+                    name,
+                    price,
+                    details,
+                    image: imageURL,
+                    createdAt: new Date().toISOString()
+                });
 
-            msg.innerText = "✅ تم إضافة المنتج بنجاح!";
-            msg.style.color = "green";
+                msg.innerText = "✅ تم إضافة المنتج بنجاح!";
+                msg.style.color = "green";
 
-            // تفريغ الحقول
-            document.getElementById("name").value = "";
-            document.getElementById("price").value = "";
-            document.getElementById("details").value = "";
-            document.getElementById("imageURL").value = "";
+                // تفريغ الحقول
+                document.getElementById("name").value = "";
+                document.getElementById("price").value = "";
+                document.getElementById("details").value = "";
+                document.getElementById("imageURL").value = "";
+
+            } catch (error) {
+                msg.innerText = "❌ فشل الحفظ. راجع الاتصال أو Firebase!";
+                msg.style.color = "red";
+                console.error(error);
+            }
         }
     </script>
 

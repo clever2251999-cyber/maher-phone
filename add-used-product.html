@@ -92,13 +92,14 @@
         <p class="message" id="msg"></p>
     </div>
 
-    <script type="module">
-        import { db, storage } from "./firebase.js";
-        import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        import { ref, uploadBytes, getDownloadURL }
-            from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+    <!-- Firebase v9 compat -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    <script src="firebase.js"></script>
 
-        window.addUsedProduct = async function () {
+    <script>
+        async function addUsedProduct() {
 
             const msg = document.getElementById("msg");
             msg.innerText = "";
@@ -118,12 +119,12 @@
             msg.style.color = "black";
 
             // رفع الصورة
-            const imageRef = ref(storage, "usedProducts/" + Date.now() + "_" + imageFile.name);
-            await uploadBytes(imageRef, imageFile);
-            const imageURL = await getDownloadURL(imageRef);
+            const imageRef = storage.ref("usedProducts/" + Date.now() + "_" + imageFile.name);
+            await imageRef.put(imageFile);
+            const imageURL = await imageRef.getDownloadURL();
 
             // حفظ البيانات
-            await addDoc(collection(db, "usedProducts"), {
+            await db.collection("usedProducts").add({
                 name,
                 price,
                 details,
@@ -139,7 +140,7 @@
             document.getElementById("price").value = "";
             document.getElementById("details").value = "";
             document.getElementById("image").value = "";
-        };
+        }
     </script>
 
 </body>

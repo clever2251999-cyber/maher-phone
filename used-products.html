@@ -41,7 +41,7 @@
         .add-btn-container {
             text-align: center;
             margin: 20px;
-            display: none; /* يظهر فقط للأدمن */
+            display: none;
         }
 
         .add-btn {
@@ -65,53 +65,58 @@
 
     <h2>📱 قائمة التليفونات المستعملة</h2>
 
-    <!-- زر إضافة منتج مستعمل (يظهر للأدمن فقط) -->
     <div id="addUsedProductBtn" class="add-btn-container">
         <a href="add-used-product.html" class="add-btn">➕ إضافة تليفون مستعمل</a>
     </div>
 
-    <!-- قائمة المنتجات المستعملة -->
-    <div class="product-list" id="usedProductsList">
-        <!-- يتم تحميل المنتجات من Firebase -->
-    </div>
+    <div class="product-list" id="usedProductsList"></div>
 
-    <!-- Firebase -->
+    <!-- Firebase (compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="firebase.js"></script>
 
-    <script type="module">
-        import { db } from "./firebase.js";
-        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
+    <script>
         async function loadUsedProducts() {
-            const productsRef = collection(db, "usedProducts");
-            const snapshot = await getDocs(productsRef);
 
             const container = document.getElementById("usedProductsList");
-            container.innerHTML = "";
+            container.innerHTML = "<p style='text-align:center;'>⏳ جاري تحميل المنتجات...</p>";
 
-            snapshot.forEach(doc => {
-                const item = doc.data();
-                container.innerHTML += `
-                    <div class="product-card">
-                        <img src="${item.image}" alt="Phone">
-                        <h3>${item.name}</h3>
-                        <p>${item.details}</p>
-                        <strong>السعر: ${item.price} ج.م</strong>
-                    </div>
-                `;
-            });
+            try {
+                const snapshot = await db.collection("usedProducts").get();
+
+                container.innerHTML = "";
+
+                snapshot.forEach(doc => {
+                    const item = doc.data();
+
+                    container.innerHTML += `
+                        <div class="product-card">
+                            <img src="${item.image}" alt="Phone">
+                            <h3>${item.name}</h3>
+                            <p>${item.details}</p>
+                            <strong>السعر: ${item.price} ج.م</strong>
+                        </div>
+                    `;
+                });
+
+                if (snapshot.empty) {
+                    container.innerHTML = "<p style='text-align:center;'>لا توجد منتجات مستعملة حالياً.</p>";
+                }
+
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = "<p style='text-align:center;color:red;'>❌ حدث خطأ أثناء تحميل المنتجات.</p>";
+            }
         }
 
-        loadUsedProducts();
+        loadUsedProducts();  
     </script>
 
-    <!-- كشف الأدمن مثل الصفحة الرئيسية -->
     <script>
         const ADMIN_EMAIL = "clever2251999@gmail.com";
-
+        
         auth.onAuthStateChanged(user => {
             if (!user) return;
 

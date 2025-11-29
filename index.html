@@ -1,86 +1,155 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8">
-  <title>تسجيل الدخول - Maher Phone</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Maher Phone - تسجيل الدخول</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-  <style>
-    body{
-        font-family:"Cairo", sans-serif;
-        background:#0a0a0f;
-        margin:0;
-        padding:0;
-        color:white;
-        text-align:center;
-    }
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Cairo', sans-serif;
+            background: #02050A;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
 
-    .login-box{
-        margin:80px auto;
-        width:300px;
-        background:#111;
-        padding:25px;
-        border-radius:14px;
-        box-shadow:0 0 15px #00eaff55;
-    }
+        .login-container {
+            background: rgba(0, 0, 0, 0.4);
+            width: 380px;
+            padding: 35px;
+            border-radius: 20px;
+            border: 2px solid #00eaff;
+            box-shadow: 0 0 25px #00eaff55;
+            text-align: center;
+            animation: fadeIn 0.8s ease;
+        }
 
-    input{
-        width:90%;
-        padding:12px;
-        margin:10px 0;
-        border:none;
-        border-radius:10px;
-        background:#222;
-        color:white;
-        font-size:16px;
-    }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-    button{
-        width:95%;
-        padding:12px;
-        background:#00eaff;
-        color:#000;
-        border:none;
-        border-radius:10px;
-        font-size:18px;
-        font-weight:700;
-        cursor:pointer;
-        margin-top:10px;
-    }
+        .logo {
+            font-size: 32px;
+            font-weight: 700;
+            color: #00eaff;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px #00eaff;
+        }
 
-    h2{
-        margin-bottom:20px;
-        color:#00eaff;
-        text-shadow:0 0 10px #00eaff;
-    }
-  </style>
+        .subtitle {
+            font-size: 16px;
+            color: #c8faff;
+            margin-bottom: 25px;
+            text-shadow: 0 0 10px #00eaff55;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 2px solid #00eaff55;
+            background: #00000055;
+            color: #fff;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: .3s;
+        }
+
+        input:focus {
+            border-color: #00eaff;
+            box-shadow: 0 0 10px #00eaff;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background: #00eaff;
+            color: #000;
+            font-size: 17px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-bottom: 10px;
+            font-weight: bold;
+            box-shadow: 0 0 15px #00eaff99;
+        }
+
+        button:hover {
+            background: #00bcd4;
+            box-shadow: 0 0 25px #00eaff;
+        }
+
+        .alt-btn {
+            background: #222;
+            color: #00eaff;
+            border: 2px solid #00eaff55;
+            box-shadow: none;
+        }
+
+        .alt-btn:hover {
+            background: #00eaff22;
+            color: #fff;
+            box-shadow: 0 0 20px #00eaff;
+        }
+    </style>
 </head>
 <body>
 
-<div class="login-box">
-    <h2>تسجيل دخول الأدمن</h2>
+    <div class="login-container">
+        <div class="logo">📱 MAHER PHONE</div>
+        <div class="subtitle">تسجيل الدخول إلى لوحة التحكم</div>
 
-    <input type="text" id="user" placeholder="اسم المستخدم">
-    <input type="password" id="pass" placeholder="كلمة المرور">
+        <input type="email" id="email" placeholder="البريد الإلكتروني">
+        <input type="password" id="password" placeholder="كلمة المرور">
 
-    <button onclick="login()">تسجيل الدخول</button>
-</div>
+        <button onclick="login()">تسجيل دخول</button>
+        <button class="alt-btn" onclick="goToLoginUser()">دخول كزائر</button>
+    </div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="firebase.js"></script>
 
 <script>
-function login(){
-    let u = document.getElementById("user").value;
-    let p = document.getElementById("pass").value;
 
-    // بيانات الدخول التي طلبتها
-    if(u === "admin" && p === "22599"){
-        localStorage.setItem("adminLogged", "true");
-        location.href = "admin.html"; // ← تفتح لوحة التحكم
-    } else {
-        alert("❌ البيانات غير صحيحة");
+function login() {
+    let email = document.getElementById("email").value.trim();
+    let password = document.getElementById("password").value.trim();
+
+    if (!email || !password) {
+        alert("⚠ يرجى إدخال البريد وكلمة المرور");
+        return;
     }
+
+    auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+            location.href = "products.html";
+        })
+        .catch(err => {
+            alert("❌ خطأ في تسجيل الدخول");
+            console.log(err);
+        });
 }
+
+function goToLoginUser() {
+    auth.signInAnonymously()
+        .then(() => location.href = "products.html")
+        .catch(err => {
+            alert("⚠ لا يمكن دخول الزائر الآن");
+            console.log(err);
+        });
+}
+
 </script>
 
 </body>

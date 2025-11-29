@@ -198,89 +198,51 @@
         box-shadow:0 0 18px #00aaffaa;
     }
 
-    #logout{
+    /* زر الترس */
+    #admin-gear{
         position:fixed;
         bottom:20px;
         left:20px;
-        padding:14px 20px;
-        background:#b82222;
-        color:white;
-        border:none;
-        border-radius:12px;
-        font-size:16px;
+        width:55px;
+        height:55px;
+        border-radius:50%;
+        font-size:26px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background:#111;
+        color:#00aaff;
+        border:2px solid #00aaff55;
+        box-shadow:0 0 15px #00aaff55;
         cursor:pointer;
-        box-shadow:0 0 12px #ff000055;
+        transition:0.25s;
+        z-index:99999;
     }
 
-    #logout:hover{
-        background:#ff0000;
-        box-shadow:0 0 15px #ff000088;
+    #admin-gear:hover{
+        background:#00aaff22;
+        box-shadow:0 0 18px #00aaffaa;
     }
 
+    #logout{
+        display:none; /* ما نحتاجه هنا */
+    }
 
-    /*=====================================*/
-    /*        📱 تحسين الموبايل           */
-    /*=====================================*/
     @media (max-width: 600px) {
-
-        header{
-            font-size:22px;
-            padding:14px;
-        }
-
-        #categories{
-            padding:10px;
-            gap:8px;
-            top:60px;
-        }
-
-        #categories button{
-            padding:8px 14px;
-            font-size:14px;
-        }
-
         #products{
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
             padding:15px;
             gap:18px;
         }
 
-        .card{
-            padding:14px;
-            border-radius:16px;
-        }
-
         .card img{
             height:180px;
         }
 
-        h3{
-            font-size:17px;
-        }
-
-        p{
-            font-size:14px;
-        }
-
-        .price{
-            font-size:18px;
-        }
-
-        .btn{
-            font-size:15px;
-            padding:10px;
-        }
-
-        #cart-btn{
-            padding:12px 18px;
-            font-size:15px;
-            bottom:15px;
-            right:15px;
-        }
-
-        #logout{
-            padding:10px 16px;
-            font-size:14px;
+        #admin-gear{
+            width:50px;
+            height:50px;
+            font-size:23px;
             bottom:15px;
             left:15px;
         }
@@ -350,7 +312,9 @@
 <div id="products"></div>
 
 <button id="cart-btn" onclick="goCart()">🛒 السلة</button>
-<button id="logout" onclick="logout()">تسجيل خروج</button>
+
+<!-- زر الترس -->
+<div id="admin-gear" onclick="location.href='login.html'">⚙️</div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -361,6 +325,8 @@
 
 let allProducts = [];
 let currentUser = null;
+
+// الادمن القديم لسه موجود للمسح فقط
 const ADMIN_EMAIL = "clever2251999@gmail.com";
 
 auth.onAuthStateChanged(user => {
@@ -372,11 +338,6 @@ auth.onAuthStateChanged(user => {
 
     loadProducts();
 });
-
-function logout(){
-    auth.signOut();
-    location.href="index.html";
-}
 
 function goCart(){
     location.href="cart.html";

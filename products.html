@@ -1,33 +1,33 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-  <meta charset="utf-8">
-  <title>Maher Phone - المنتجات</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<title>Maher Phone - المتجر</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-  <style>
+<style>
     body{
         font-family:"Cairo", sans-serif;
         direction:rtl;
         margin:0;
-        background:#0a0a0a;
+        background:#0a0a0f;
         color:#e8e8e8;
+        padding-bottom:80px;
     }
 
     header{
-        background:#0f0f0f;
+        background:#111;
         padding:20px;
+        color:#00eaff;
         text-align:center;
-        font-size:28px;
+        font-size:26px;
         font-weight:700;
+        box-shadow:0 2px 10px #00000040;
         position:sticky;
         top:0;
-        z-index:10;
-        color:#00aaff;
-        box-shadow:0 0 12px #00aaff55;
-        border-bottom:1px solid #00aaff33;
+        z-index:100;
     }
 
     #categories{
@@ -35,328 +35,176 @@
         overflow-x:auto;
         gap:12px;
         padding:15px;
-        background:#0d0d0d;
-        position:sticky;
-        top:70px;
-        z-index:9;
-        box-shadow:0 0 10px #00aaff33 inset;
+        background:#0f0f14;
         border-bottom:1px solid #00aaff22;
     }
 
-    #categories button{
-        padding:10px 18px;
+    .cat-btn{
+        padding:10px 16px;
         background:#111;
-        color:#d8d8d8;
-        border:none;
-        border-radius:50px;
+        border:1px solid #00aaff55;
+        color:#00eaff;
+        border-radius:10px;
         cursor:pointer;
         white-space:nowrap;
-        font-size:15px;
-        font-weight:600;
         transition:0.25s;
-        border:1px solid #00aaff33;
     }
 
-    #categories button:hover{
-        background:#0d0d0d;
-        color:#00aaff;
-        box-shadow:0 0 10px #00aaff55;
-    }
-
-    #categories button.active{
+    .cat-btn:hover, .cat-btn.active{
         background:#00aaff33;
-        color:#fff;
-        box-shadow:0 0 12px #00aaff88;
-        border:1px solid #00aaff55;
+        border-color:#00eaff;
     }
 
-    #products{
+    #product-list{
+        padding:20px;
         display:grid;
-        grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
-        gap:25px;
-        padding:30px;
-        max-width:1300px;
-        margin:auto;
+        grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+        gap:20px;
     }
 
-    .card{
+    .product-card{
         background:#111;
-        padding:18px;
-        border-radius:20px;
-        box-shadow:0 0 15px #00aaff11;
-        text-align:center;
-        transition:0.3s;
-        border:1px solid #00aaff22;
-    }
-
-    .card:hover{
-        transform:translateY(-4px);
-        box-shadow:0 0 18px #00aaff55;
-        border-color:#00aaff66;
-    }
-
-    .card img{
-        width:100%;
-        height:240px;
-        object-fit:cover;
-        border-radius:16px;
-        box-shadow:0 0 10px #00aaff33;
-    }
-
-    h3{
-        margin:12px 0 6px;
-        color:#fff;
-    }
-
-    p{
-        color:#ccc;
-        font-size:15px;
-    }
-
-    .price{
-        margin-top:8px;
-        font-size:20px;
-        font-weight:700;
-        color:#00aaff;
-        text-shadow:0 0 8px #00aaff55;
-    }
-
-    .btn{
-        background:#0d0d0d;
-        color:#fff;
-        padding:12px;
-        border:none;
+        padding:15px;
         border-radius:14px;
-        cursor:pointer;
+        border:1px solid #00aaff33;
+        box-shadow:0 0 12px #00aaff33;
+    }
+
+    .product-card img{
         width:100%;
-        font-size:17px;
-        font-weight:600;
-        margin-top:12px;
-        border:1px solid #00aaff44;
+        border-radius:10px;
+    }
+
+    .product-card h3{
+        margin:10px 0 5px;
+        color:#00eaff;
+    }
+
+    .product-card p{
+        margin:5px 0;
+        color:#ccc;
+    }
+
+    .add-btn{
+        width:100%;
+        padding:10px;
+        margin-top:10px;
+        background:#00aaff;
+        color:#000;
+        border:0;
+        border-radius:8px;
+        cursor:pointer;
+        font-size:16px;
+        font-weight:700;
         transition:0.25s;
     }
 
-    .btn:hover{
-        background:#00aaff33;
-        color:#fff;
-        box-shadow:0 0 12px #00aaff88;
-        border-color:#00aaff88;
+    .add-btn:hover{
+        background:#00eaff;
     }
 
-    .del-btn{
-        background:#b82222;
-        margin-top:10px;
-        border:none;
-        box-shadow:0 0 10px #ff222244;
-    }
-
-    .del-btn:hover{
-        background:#ff0000;
-        box-shadow:0 0 15px #ff000066;
-    }
-
-    #cart-btn{
+    /* زر الترس */
+    #admin-btn{
         position:fixed;
         bottom:20px;
-        right:20px;
-        padding:16px 22px;
-        background:#00aaff;
-        color:white;
-        border:none;
+        left:20px;
+        padding:14px 18px;
+        background:#111;
+        color:#00aaff;
+        border:1px solid #00aaff55;
         border-radius:50px;
-        font-size:17px;
+        font-size:22px;
         cursor:pointer;
-        box-shadow:0 0 18px #00aaff55;
+        box-shadow:0 0 15px #00aaff55;
         transition:0.25s;
+        z-index:9999;
     }
 
-    #cart-btn:hover{
-        background:#0088cc;
-        box-shadow:0 0 18px #00aaffaa;
-    }
-
-    /* زر الإدمن العائم */
-    #admin-floating-btn {
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        width: 55px;
-        height: 55px;
-        background: #111;
-        border: 2px solid #00aaff55;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 28px;
-        color: #00aaff;
-        cursor: pointer;
-        box-shadow: 0 0 12px #00aaff55;
-        z-index: 99999;
-        transition: 0.25s;
-    }
-
-    #admin-floating-btn:hover {
+    #admin-btn:hover{
         background:#00aaff33;
-        color:white;
         box-shadow:0 0 18px #00aaffaa;
     }
-
-  </style>
+</style>
 </head>
+
 <body>
 
-<header>📱 Maher Phone</header>
+<header>Maher Phone - المتجر</header>
 
-<div style="
-    background:#0f0f0f;
-    padding:6px 0;
-    text-align:center;
-    font-size:18px;
-    color:#00aaff;">
-    <span style="font-size:20px;">📞</span>
-    <strong>للتواصل:</strong>
-    <span style="font-weight:900; font-size:20px; margin:0 8px; color:#e8e8e8;">
-        01110112115
-    </span>
-    <span style="color:#00aaff;"> - </span>
-    <span style="font-weight:900; font-size:20px; margin:0 8px; color:#e8e8e8;">
-        01157642100
-    </span>
-</div>
+<div id="categories"></div>
 
-<div style="text-align:center; padding:15px;">
-    <button onclick="location.href='used-products.html'"
-        style="
-        background:#0d0d0d;
-        border:1px solid #00aaff44;
-        padding:10px 18px;
-        font-size:17px;
-        border-radius:50px;
-        cursor:pointer;
-        display:inline-flex;
-        align-items:center;
-        gap:8px;
-        box-shadow:0 0 12px #00aaff33;
-        color:#fff;">
-        📱 تليفونات مستعملة
-    </button>
-</div>
+<div id="product-list"></div>
 
-<div id="categories">
-    <button class="active" onclick="filterCategory('all')">🔍 الكل</button>
-    <button onclick="filterCategory('chargers')">🔌 الشواحن</button>
-    <button onclick="filterCategory('cables')">🔗 الوصلات</button>
-    <button onclick="filterCategory('handsfree')">🎧 الهاندفري</button>
-    <button onclick="filterCategory('screens')">📱 الاسكرينات</button>
-    <button onclick="filterCategory('airpods')">🎵 الايربودز</button>
-    <button onclick="filterCategory('speakers')">🔊 السماعات</button>
-</div>
+<!-- زر الترس -->
+<button id="admin-btn" onclick="goLogin()">⚙️</button>
 
-<div id="products"></div>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
-<!-- زر السلة -->
-<button id="cart-btn" onclick="goCart()">🛒 السلة</button>
-
-<!-- زر الإدمن العائم -->
-<div id="admin-floating-btn" onclick="goAdmin()">⚙️</div>
-
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="firebase.js"></script>
 
 <script>
 
-let allProducts = [];
+// تحميل الفئات
+db.collection("categories").onSnapshot(snapshot=>{
+    const catBox = document.getElementById("categories");
+    catBox.innerHTML = "";
 
-/* 🔥 حذف Firebase Auth — تشغيل التحميل مباشرة */
-loadProducts();
+    catBox.innerHTML += `<button class="cat-btn active" onclick="loadProducts('all')">الكل</button>`;
 
-/* 🔵 الذهاب لصفحة تسجيل الدخول */
-function goAdmin(){
-    location.href = "index.html";
-}
-
-/* 🔵 الذهاب للسلة */
-function goCart(){
-    location.href = "cart.html";
-}
-
-function addToCart(item){
-    let cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    cart.push(item);
-    localStorage.setItem("cart", JSON.stringify(cart));
-    alert("✔ تم إضافة المنتج إلى السلة");
-}
-
-/* تحميل المنتجات */
-async function loadProducts(){
-
-    const container = document.getElementById("products");
-    container.innerHTML = "<p style='width:100%;text-align:center'>⏳ جاري تحميل المنتجات...</p>";
-
-    allProducts = [];
-
-    let snap = await db.collection("products").orderBy("createdAt", "desc").get();
-
-    snap.forEach(doc => {
-        allProducts.push({
-            ...doc.data(),
-            id: doc.id
-        });
-    });
-
-    renderProducts(allProducts);
-}
-
-/* عرض المنتجات */
-function renderProducts(list){
-
-    const container = document.getElementById("products");
-    container.innerHTML = "";
-
-    if (list.length === 0){
-        container.innerHTML = "<p style='text-align:center;width:100%;color:#ccc'>لا توجد منتجات في هذا القسم</p>";
-        return;
-    }
-
-    list.forEach(p => {
-
-        container.innerHTML += `
-            <div class="card">
-                <img src="${p.imageURL || p.image}">
-                <h3>${p.name}</h3>
-                <p>${p.description}</p>
-                <div class="price">${p.price} جنيه</div>
-
-                <button class="btn" onclick='addToCart(${JSON.stringify({
-                    id: p.id,
-                    name: p.name,
-                    price: p.price,
-                    image: p.imageURL || p.image
-                })})'>
-                    🛒 إضافة إلى السلة
-                </button>
-            </div>
+    snapshot.forEach(cat=>{
+        catBox.innerHTML += `
+            <button class="cat-btn" onclick="loadProducts('${cat.id}')">${cat.data().name}</button>
         `;
     });
+});
+
+// تحميل المنتجات
+function loadProducts(category){
+    const productList = document.getElementById("product-list");
+    productList.innerHTML = `<p>جار التحميل...</p>`;
+
+    let ref = db.collection("products");
+    if(category !== "all") ref = ref.where("category", "==", category);
+
+    ref.get().then(snapshot=>{
+        productList.innerHTML = "";
+        snapshot.forEach(prod=>{
+            const p = prod.data();
+
+            productList.innerHTML += `
+                <div class="product-card">
+                    <img src="${p.image}" alt="">
+                    <h3>${p.name}</h3>
+                    <p>${p.desc}</p>
+                    <p><b>${p.price} جنيه</b></p>
+                    <button class="add-btn" onclick="addToCart('${prod.id}', '${p.name}', '${p.price}', '${p.image}')">أضف للسلة</button>
+                </div>
+            `;
+        });
+    });
 }
 
-/* الفلترة */
-function filterCategory(cat){
+// إضافة للسلة
+function addToCart(id, name, price, image){
+    let cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-    document.querySelectorAll("#categories button")
-            .forEach(b => b.classList.remove("active"));
-    event.target.classList.add("active");
+    const found = cart.find(item=> item.id === id);
+    if(found) found.qty++;
+    else cart.push({ id, name, price, image, qty:1 });
 
-    if (cat === "all"){
-        renderProducts(allProducts);
-    } else {
-        renderProducts(allProducts.filter(p => p.category === cat));
-    }
+    localStorage.setItem("cart", JSON.stringify(cart));
+    alert("تمت الإضافة للسلة");
 }
+
+// زر الترس → صفحة تسجيل الدخول
+function goLogin(){
+    location.href = "login.html";
+}
+
+loadProducts("all");
 
 </script>
-
 </body>
 </html>

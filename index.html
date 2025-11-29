@@ -87,22 +87,19 @@
             background: #00bcd4;
             box-shadow: 0 0 25px #00eaff;
         }
-
-        .alt-btn {
-            background: #222;
-            color: #00eaff;
-            border: 2px solid #00eaff55;
-            box-shadow: none;
-        }
-
-        .alt-btn:hover {
-            background: #00eaff22;
-            color: #fff;
-            box-shadow: 0 0 20px #00eaff;
-        }
     </style>
 </head>
 <body>
+
+<script>
+    // 🚀 أي حد يدخل على الصفحة دي بدون ما يكون أدمن → نرجعه للمنتجات
+    // دا يمنع العميل من فتحها نهائياً
+    setTimeout(() => {
+        if (!sessionStorage.getItem("admin_mode")) {
+            window.location.href = "products.html";
+        }
+    }, 10);
+</script>
 
     <div class="login-container">
         <div class="logo">📱 MAHER PHONE</div>
@@ -112,7 +109,6 @@
         <input type="password" id="password" placeholder="كلمة المرور">
 
         <button onclick="login()">تسجيل دخول</button>
-        <button class="alt-btn" onclick="goToLoginUser()">دخول كزائر</button>
     </div>
 
 <!-- Firebase -->
@@ -133,19 +129,11 @@ function login() {
 
     auth.signInWithEmailAndPassword(email, password)
         .then(() => {
-            location.href = "products.html";
+            sessionStorage.setItem("admin_mode", "true"); // 🟦 نثبت إن دا أدمن
+            location.href = "admin-panel.html";           // 🟦 ينقله للوحة التحكم
         })
         .catch(err => {
             alert("❌ خطأ في تسجيل الدخول");
-            console.log(err);
-        });
-}
-
-function goToLoginUser() {
-    auth.signInAnonymously()
-        .then(() => location.href = "products.html")
-        .catch(err => {
-            alert("⚠ لا يمكن دخول الزائر الآن");
             console.log(err);
         });
 }

@@ -27,6 +27,12 @@
             border: 2px solid #00eaff;
             box-shadow: 0 0 25px #00eaff55;
             text-align: center;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .logo {
@@ -34,6 +40,14 @@
             font-weight: 700;
             color: #00eaff;
             margin-bottom: 10px;
+            text-shadow: 0 0 15px #00eaff;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #c8faff;
+            margin-bottom: 25px;
+            text-shadow: 0 0 10px #00eaff55;
         }
 
         input {
@@ -45,6 +59,13 @@
             color: #fff;
             border-radius: 10px;
             font-size: 15px;
+            transition: .3s;
+        }
+
+        input:focus {
+            border-color: #00eaff;
+            box-shadow: 0 0 10px #00eaff;
+            outline: none;
         }
 
         button {
@@ -56,14 +77,28 @@
             font-size: 17px;
             border-radius: 12px;
             cursor: pointer;
+            transition: 0.3s;
             margin-bottom: 10px;
             font-weight: bold;
+            box-shadow: 0 0 15px #00eaff99;
+        }
+
+        button:hover {
+            background: #00bcd4;
+            box-shadow: 0 0 25px #00eaff;
         }
 
         .alt-btn {
             background: #222;
             color: #00eaff;
             border: 2px solid #00eaff55;
+            box-shadow: none;
+        }
+
+        .alt-btn:hover {
+            background: #00eaff22;
+            color: #fff;
+            box-shadow: 0 0 20px #00eaff;
         }
     </style>
 </head>
@@ -71,6 +106,7 @@
 
     <div class="login-container">
         <div class="logo">📱 MAHER PHONE</div>
+        <div class="subtitle">تسجيل الدخول إلى لوحة التحكم</div>
 
         <input type="email" id="email" placeholder="البريد الإلكتروني">
         <input type="password" id="password" placeholder="كلمة المرور">
@@ -86,9 +122,7 @@
 
 <script>
 
-const ADMIN_EMAIL = "clever2251999@gmail.com";
-
-// تسجيل دخول أدمن
+// تسجيل دخول الأدمن
 function login() {
     let email = document.getElementById("email").value.trim();
     let password = document.getElementById("password").value.trim();
@@ -99,14 +133,8 @@ function login() {
     }
 
     auth.signInWithEmailAndPassword(email, password)
-        .then(user => {
-
-            if (email === ADMIN_EMAIL) {
-                location.href = "admin.html";   // ← لوحة التحكم صح
-            } else {
-                location.href = "products.html"; // ← لو هو مستخدم عادي
-            }
-
+        .then(() => {
+            location.href = "admin.html"; // دخول للوحة التحكم
         })
         .catch(err => {
             alert("❌ خطأ في تسجيل الدخول");
@@ -114,14 +142,14 @@ function login() {
         });
 }
 
-// دخول كزائر
+// دخول كزائر → صفحة المتجر الأساسية products.html
 function visitAsGuest() {
     auth.signInAnonymously()
         .then(() => {
-            location.href = "products.html"; // يدخل على المتجر علطول
+            location.href = "products.html";
         })
         .catch(err => {
-            alert("❌ خطأ في دخول الزائر");
+            alert("⚠ لا يمكن دخول الزائر الآن");
             console.log(err);
         });
 }

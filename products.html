@@ -45,7 +45,7 @@
         font-size:15px;
         font-weight:700;
         box-shadow:0 0 10px #00aaff44;
-        display:none;
+        display:block; /* ← اتعدلت */
     }
     #adminBtn:hover{
         background:#00aaff33;
@@ -304,7 +304,7 @@
 
 <header>
     📱 Maher Phone
-    <button id="adminBtn" onclick="location.href='index.html'">Admin</button>
+    <button id="adminBtn" onclick="location.href='login.html'">Admin</button>
 </header>
 
 <div style="
@@ -381,9 +381,8 @@ const ADMIN_EMAIL = "clever2251999@gmail.com";
 auth.onAuthStateChanged(user => {
     currentUser = user;
 
-    // 👇 إظهار زر الأدمن في الهيدر
+    // زر الأدمن فقط لو أدمن (دا للتحكم وليس للظهور)
     if (user && !user.isAnonymous && user.email === ADMIN_EMAIL){
-        document.getElementById("adminBtn").style.display = "inline-block";
         document.getElementById("adminPanel").style.display = "block";
     }
 

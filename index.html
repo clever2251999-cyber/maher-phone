@@ -198,7 +198,6 @@
         box-shadow:0 0 18px #00aaffaa;
     }
 
-    /* زر الترس */
     #admin-gear{
         position:fixed;
         bottom:20px;
@@ -222,10 +221,6 @@
     #admin-gear:hover{
         background:#00aaff22;
         box-shadow:0 0 18px #00aaffaa;
-    }
-
-    #logout{
-        display:none; /* ما نحتاجه هنا */
     }
 
     @media (max-width: 600px) {
@@ -254,15 +249,8 @@
 
 <header>📱 Maher Phone</header>
 
-<div style="
-    background:#0f0f0f;
-    padding:6px 0;
-    text-align:center;
-    font-size:18px;
-    color:#00aaff;
-    border-bottom:1px solid #00aaff22;
-    box-shadow:0 0 10px #00aaff22 inset;
-">
+<div style="background:#0f0f0f; padding:6px 0; text-align:center; font-size:18px;
+color:#00aaff; border-bottom:1px solid #00aaff22; box-shadow:0 0 10px #00aaff22 inset;">
     <span style="font-size:20px;">📞</span>
     <strong>للتواصل:</strong>
 
@@ -279,18 +267,9 @@
 
 <div style="text-align:center; padding:15px;">
     <button onclick="location.href='used-products.html'"
-        style="
-            background:#0d0d0d;
-            border:1px solid #00aaff44;
-            padding:10px 18px;
-            font-size:17px;
-            border-radius:50px;
-            cursor:pointer;
-            display:inline-flex;
-            align-items:center;
-            gap:8px;
-            box-shadow:0 0 12px #00aaff33;
-            color:#fff;">
+        style="background:#0d0d0d; border:1px solid #00aaff44; padding:10px 18px;
+        font-size:17px; border-radius:50px; cursor:pointer; display:inline-flex;
+        align-items:center; gap:8px; box-shadow:0 0 12px #00aaff33; color:#fff;">
         📱 تليفونات مستعملة
     </button>
 </div>
@@ -313,9 +292,9 @@
 
 <button id="cart-btn" onclick="goCart()">🛒 السلة</button>
 
-<!-- زر الترس -->
 <div id="admin-gear" onclick="location.href='login.html'">⚙️</div>
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -326,12 +305,16 @@
 let allProducts = [];
 let currentUser = null;
 
-// الادمن القديم لسه موجود للمسح فقط
 const ADMIN_EMAIL = "clever2251999@gmail.com";
 
+// 🔥 التحكم الحقيقي في ظهور أدوات الأدمن
 auth.onAuthStateChanged(user => {
     currentUser = user;
 
+    // اخفاء الأدمن افتراضياً
+    document.getElementById("adminPanel").style.display = "none";
+
+    // اظهار الأدمن لو سجل دخول
     if (user && !user.isAnonymous && user.email === ADMIN_EMAIL){
         document.getElementById("adminPanel").style.display = "block";
     }

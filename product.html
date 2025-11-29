@@ -146,7 +146,7 @@ function login() {
 function visitAsGuest() {
     auth.signInAnonymously()
         .then(() => {
-            location.href = "products.html"; // ← المتجر مباشرة
+            location.href = "index.html"; // ← المتجر مباشرة
         })
         .catch(err => {
             alert("⚠ لا يمكن دخول الزائر الآن");

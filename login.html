@@ -112,7 +112,7 @@
         <input type="password" id="password" placeholder="كلمة المرور">
 
         <button onclick="login()">تسجيل دخول</button>
-        <button class="alt-btn" onclick="goToLoginUser()">دخول كزائر</button>
+        <button class="alt-btn" onclick="visitAsGuest()">دخول كزائر</button>
     </div>
 
 <!-- Firebase -->
@@ -122,6 +122,7 @@
 
 <script>
 
+// تسجيل دخول الأدمن
 function login() {
     let email = document.getElementById("email").value.trim();
     let password = document.getElementById("password").value.trim();
@@ -133,7 +134,7 @@ function login() {
 
     auth.signInWithEmailAndPassword(email, password)
         .then(() => {
-            location.href = "products.html";
+            location.href = "admin.html"; // دخول للوحة التحكم
         })
         .catch(err => {
             alert("❌ خطأ في تسجيل الدخول");
@@ -141,9 +142,12 @@ function login() {
         });
 }
 
-function goToLoginUser() {
+// دخول كزائر → صفحة المتجر الأساسية products.html
+function visitAsGuest() {
     auth.signInAnonymously()
-        .then(() => location.href = "products.html")
+        .then(() => {
+            location.href = "products.html";
+        })
         .catch(err => {
             alert("⚠ لا يمكن دخول الزائر الآن");
             console.log(err);

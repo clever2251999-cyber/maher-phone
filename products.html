@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8">
-  <title>المنتجات - Maher Phone</title>
+  <title>Maher Phone - المنتجات</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -10,121 +10,94 @@
   <style>
     body{
         font-family:"Cairo", sans-serif;
-        margin:0;
-        background:#f3f4f6;
         direction:rtl;
+        margin:0;
+        background:#0a0a0f;
+        color:white;
+        padding-bottom:80px;
     }
 
     header{
-        background:white;
-        padding:18px;
-        color:#000;
+        background:#111;
+        padding:20px;
+        color:#00eaff;
         text-align:center;
-        font-size:26px;
+        font-size:28px;
         font-weight:700;
-        box-shadow:0 2px 10px #00000015;
         position:sticky;
         top:0;
         z-index:10;
+        box-shadow:0 0 12px #00eaff55;
     }
 
     #products{
         display:grid;
-        grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+        grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
         gap:18px;
         padding:20px;
     }
 
     .card{
-        background:white;
-        padding:15px;
-        border-radius:14px;
-        box-shadow:0 4px 12px #00000010;
+        background:#111;
+        padding:12px;
+        border-radius:16px;
+        border:1px solid #00aaff33;
+        box-shadow:0 0 12px #00aaff22;
         text-align:center;
     }
 
     .card img{
         width:100%;
-        height:220px;
+        height:200px;
         object-fit:cover;
         border-radius:12px;
+        margin-bottom:10px;
     }
 
-    .admin-btn{
+    .price{
+        color:#00ffaa;
+        margin:6px 0;
+        font-weight:700;
+        text-shadow:0 0 8px #00ffaa;
+    }
+
+    /* زر الأدمن العائم */
+    #admin-btn{
         position:fixed;
         bottom:20px;
         right:20px;
-        background:#0d6efd;
-        color:white;
-        padding:12px 18px;
-        font-weight:700;
-        border-radius:14px;
-        cursor:pointer;
-        border:none;
-        box-shadow:0 4px 12px #00000030;
-    }
-
-    /* شاشة تسجيل الدخول */
-    #login-box{
-        position:fixed;
-        top:0;left:0;
-        width:100%;height:100%;
-        background:#00000080;
+        width:55px;
+        height:55px;
+        background:#00eaff;
+        color:#000;
+        border-radius:50%;
         display:flex;
         justify-content:center;
         align-items:center;
-        display:none;
-    }
-
-    #login-form{
-        background:white;
-        padding:25px;
-        border-radius:16px;
-        width:320px;
-        text-align:center;
-        box-shadow:0 4px 15px #00000050;
-    }
-
-    input{
-        width:90%;
-        padding:12px;
-        margin-top:10px;
-        border-radius:10px;
-        border:1px solid #ccc;
-        font-size:16px;
-    }
-
-    #login-btn{
-        margin-top:15px;
-        background:#0d6efd;
-        color:white;
-        padding:12px;
-        width:100%;
-        border:none;
-        font-size:18px;
-        font-weight:700;
-        border-radius:10px;
+        font-size:26px;
+        font-weight:bold;
         cursor:pointer;
+        box-shadow:0 0 15px #00eaffaa;
+        z-index:999;
+        transition:0.3s;
     }
+
+    #admin-btn:hover{
+        transform:scale(1.1);
+        box-shadow:0 0 18px #00eaff;
+    }
+
   </style>
 </head>
+
 <body>
 
-<header>جميع المنتجات</header>
+<header>Maher Phone - المنتجات</header>
 
 <div id="products"></div>
 
-<button class="admin-btn" onclick="openLogin()">لوحة التحكم ⚙</button>
-
-<!-- نافذة تسجيل الدخول -->
-<div id="login-box">
-    <div id="login-form">
-        <h2>تسجيل الدخول</h2>
-        <input type="text" id="username" placeholder="اسم المستخدم">
-        <input type="password" id="password" placeholder="كلمة المرور">
-        <button id="login-btn" onclick="login()">دخول</button>
-    </div>
-</div>
+<!-- زر الأدمن ⚙️ -->
+<div id="admin-btn" onclick="location.href='login.html'">⚙️</div>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -133,12 +106,11 @@
 
 <script>
 
-// تحميل المنتجات
 function loadProducts(){
     const container = document.getElementById("products");
-    container.innerHTML = "<p style='text-align:center;width:100%'>⏳ جاري التحميل...</p>";
+    container.innerHTML = "<p style='width:100%;text-align:center'>⏳ جاري التحميل...</p>";
 
-    db.collection("products").orderBy("createdAt", "desc").get().then(snap=>{
+    db.collection("products").orderBy("createdAt","desc").get().then(snap=>{
         container.innerHTML = "";
         snap.forEach(doc=>{
             let p = doc.data();
@@ -148,7 +120,7 @@ function loadProducts(){
                     <img src="${p.imageURL}">
                     <h3>${p.name}</h3>
                     <p>${p.description}</p>
-                    <p><strong>${p.price} جنيه</strong></p>
+                    <p class="price">${p.price} جنيه</p>
                 </div>
             `;
         });
@@ -156,24 +128,6 @@ function loadProducts(){
 }
 
 loadProducts();
-
-
-// فتح شاشة تسجيل الدخول
-function openLogin(){
-    document.getElementById("login-box").style.display = "flex";
-}
-
-// تسجيل الدخول اليدوي
-function login(){
-    const user = document.getElementById("username").value.trim();
-    const pass = document.getElementById("password").value.trim();
-
-    if(user === "admin" && pass === "22599"){
-        location.href = "admin.html";
-    } else {
-        alert("❌ بيانات الدخول غير صحيحة");
-    }
-}
 
 </script>
 

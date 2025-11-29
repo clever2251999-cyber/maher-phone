@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8">
   <title>Maher Phone - المنتجات</title>
@@ -68,29 +68,6 @@
         color:#fff;
         box-shadow:0 0 12px #00aaff88;
         border:1px solid #00aaff55;
-    }
-
-    #adminPanel{
-        padding:20px;
-        text-align:center;
-        display:none;
-    }
-
-    #adminPanel button{
-        padding:12px 20px;
-        font-size:17px;
-        border:none;
-        border-radius:14px;
-        background:#00aaff;
-        color:white;
-        cursor:pointer;
-        margin-bottom:10px;
-        transition:0.25s;
-    }
-
-    #adminPanel button:hover{
-        background:#0088cc;
-        box-shadow:0 0 12px #00aaff88;
     }
 
     #products{
@@ -198,28 +175,7 @@
         box-shadow:0 0 18px #00aaffaa;
     }
 
-    /* زر تسجيل الخروج */
-    #logout{
-        position:fixed;
-        bottom:20px;
-        left:90px;
-        padding:14px 20px;
-        background:#b82222;
-        color:white;
-        border:none;
-        border-radius:12px;
-        font-size:16px;
-        cursor:pointer;
-        box-shadow:0 0 12px #ff000055;
-        z-index:9999;
-    }
-
-    #logout:hover{
-        background:#ff0000;
-        box-shadow:0 0 15px #ff000088;
-    }
-
-    /* زر الادمن ⚙️ */
+    /* زر الإدمن العائم */
     #admin-floating-btn {
         position: fixed;
         bottom: 20px;
@@ -257,19 +213,13 @@
     padding:6px 0;
     text-align:center;
     font-size:18px;
-    color:#00aaff;
-    border-bottom:1px solid #00aaff22;
-    box-shadow:0 0 10px #00aaff22 inset;
-">
+    color:#00aaff;">
     <span style="font-size:20px;">📞</span>
     <strong>للتواصل:</strong>
-
     <span style="font-weight:900; font-size:20px; margin:0 8px; color:#e8e8e8;">
         01110112115
     </span>
-
     <span style="color:#00aaff;"> - </span>
-
     <span style="font-weight:900; font-size:20px; margin:0 8px; color:#e8e8e8;">
         01157642100
     </span>
@@ -278,17 +228,17 @@
 <div style="text-align:center; padding:15px;">
     <button onclick="location.href='used-products.html'"
         style="
-            background:#0d0d0d;
-            border:1px solid #00aaff44;
-            padding:10px 18px;
-            font-size:17px;
-            border-radius:50px;
-            cursor:pointer;
-            display:inline-flex;
-            align-items:center;
-            gap:8px;
-            box-shadow:0 0 12px #00aaff33;
-            color:#fff;">
+        background:#0d0d0d;
+        border:1px solid #00aaff44;
+        padding:10px 18px;
+        font-size:17px;
+        border-radius:50px;
+        cursor:pointer;
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+        box-shadow:0 0 12px #00aaff33;
+        color:#fff;">
         📱 تليفونات مستعملة
     </button>
 </div>
@@ -303,50 +253,33 @@
     <button onclick="filterCategory('speakers')">🔊 السماعات</button>
 </div>
 
-<div id="adminPanel">
-    <button onclick="location.href='index.html'">➕ إضافة منتج جديد</button>
-</div>
-
 <div id="products"></div>
 
+<!-- زر السلة -->
 <button id="cart-btn" onclick="goCart()">🛒 السلة</button>
-<button id="logout" onclick="logout()">تسجيل خروج</button>
 
 <!-- زر الإدمن العائم -->
 <div id="admin-floating-btn" onclick="goAdmin()">⚙️</div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="firebase.js"></script>
 
 <script>
 
 let allProducts = [];
-let currentUser = null;
-const ADMIN_EMAIL = "admin"; // كما طلبت
 
-auth.onAuthStateChanged(user => {
-    currentUser = user;
+/* 🔥 حذف Firebase Auth — تشغيل التحميل مباشرة */
+loadProducts();
 
-    if (user && !user.isAnonymous && user.email === ADMIN_EMAIL){
-        document.getElementById("adminPanel").style.display = "block";
-    }
-
-    loadProducts();
-});
-
-function logout(){
-    auth.signOut();
-    location.href="index.html";
-}
-
+/* 🔵 الذهاب لصفحة تسجيل الدخول */
 function goAdmin(){
-    location.href="index.html";
+    location.href = "index.html";
 }
 
+/* 🔵 الذهاب للسلة */
 function goCart(){
-    location.href="cart.html";
+    location.href = "cart.html";
 }
 
 function addToCart(item){
@@ -356,18 +289,11 @@ function addToCart(item){
     alert("✔ تم إضافة المنتج إلى السلة");
 }
 
-function deleteProduct(id){
-    if (confirm("هل تريد حذف هذا المنتج؟")){
-        db.collection("products").doc(id).delete();
-        alert("✔ تم حذف المنتج");
-        loadProducts();
-    }
-}
-
+/* تحميل المنتجات */
 async function loadProducts(){
 
     const container = document.getElementById("products");
-    container.innerHTML = "<p style='width:100%;text-align:center'>جاري تحميل المنتجات...</p>";
+    container.innerHTML = "<p style='width:100%;text-align:center'>⏳ جاري تحميل المنتجات...</p>";
 
     allProducts = [];
 
@@ -383,6 +309,7 @@ async function loadProducts(){
     renderProducts(allProducts);
 }
 
+/* عرض المنتجات */
 function renderProducts(list){
 
     const container = document.getElementById("products");
@@ -394,14 +321,6 @@ function renderProducts(list){
     }
 
     list.forEach(p => {
-
-        let delBtn = "";
-        if (currentUser && !currentUser.isAnonymous && currentUser.email === ADMIN_EMAIL){
-            delBtn = `
-                <button class="btn del-btn" onclick="deleteProduct('${p.id}')">
-                    🗑 حذف المنتج
-                </button>`;
-        }
 
         container.innerHTML += `
             <div class="card">
@@ -418,13 +337,12 @@ function renderProducts(list){
                 })})'>
                     🛒 إضافة إلى السلة
                 </button>
-
-                ${delBtn}
             </div>
         `;
     });
 }
 
+/* الفلترة */
 function filterCategory(cat){
 
     document.querySelectorAll("#categories button")

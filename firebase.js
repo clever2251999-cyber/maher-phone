@@ -17,6 +17,6 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ❗ مهم: اجعلهم Global
+// جعلهم Global
 window.auth = auth;
 window.db = db;
